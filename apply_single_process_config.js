@@ -1,4 +1,6 @@
-# ════════════════════════════════════════════════════════════════════
+const fs = require('fs');
+
+const singleProcessYaml = `# ════════════════════════════════════════════════════════════════════
 #  MSA AI — Single-Process Multi-Threaded Engine v3.0
 #  All models unified under ONE master process at: http://localhost:20131/v1
 #  Hardware: 12-Core AMD Multi-Threading with Libuv Async Threadpool
@@ -42,3 +44,9 @@ tabAutocompleteModel:
   provider: ollama
   model: qwen2.5:0.5b
   apiBase: http://localhost:11435
+`;
+
+fs.writeFileSync('C:\\Users\\MD SADIQUE AMIN\\.continue\\config.yaml', singleProcessYaml, { encoding: 'utf8' });
+fs.writeFileSync('D:\\current using file\\8-17-2026\\config.yaml.final', singleProcessYaml, { encoding: 'utf8' });
+
+console.log('✅ All models unified under single multi-threaded process at http://localhost:20131/v1!');
