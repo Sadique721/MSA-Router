@@ -165,9 +165,9 @@ sequenceDiagram
 
 ### 5.2 Cloud Hybrid Models (Configured in Gateway)
 | Model Identifier | Provider | Description |
-|:---|:---:|:---|
-| **`gemini-2.5-flash`** | Google Cloud | 1M Context Window, high-speed multimodal reasoning |
-| **`gemini-2.5-pro`** | Google Cloud | Deep analytical research, tool execution, complex refactoring |
+|:---:|---|:---|
+| **`gemini-3.7-flash`** | Google Cloud | 1M Context Window, ultra-fast multimodal reasoning |
+| **`gemini-3.1-flash-lite`** | Google Cloud | Lightweight high-throughput free-tier inference |
 
 ---
 
