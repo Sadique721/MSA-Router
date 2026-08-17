@@ -238,11 +238,11 @@ graph TD
         </ul>
       </td>
       <td width="50%">
-        <h3>🎨 Unified Cross-IDE Brand Assets</h3>
+        <h3>💎 Automated Token-Guard & Semantic Cache</h3>
         <ul>
-          <li>Custom glowing neural brain logo.</li>
-          <li>Multi-resolution <code>.ico</code> & <code>.png</code> brand kit.</li>
-          <li>Auto-configured for Continue, VS Code & IntelliJ.</li>
+          <li><b>Smart Context Trimmer:</b> Prunes historical turns (Saves 60–80% tokens).</li>
+          <li><b>0-Token Semantic Cache:</b> Instant &lt;10ms responses for repeated queries.</li>
+          <li><b>Live Analytics:</b> Real-time token tracking via <code>GET /v1/token-stats</code>.</li>
         </ul>
       </td>
     </tr>
