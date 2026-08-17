@@ -260,10 +260,10 @@ sequenceDiagram
 | **`qwen2.5:0.5b`** | 0.37B | Ultra-low latency tab autocomplete suggestions | 32,768 tokens | Q4_K_M |
 
 ### 6.2 Cloud Hybrid Models (Configured in Gateway)
-| Model Identifier | Provider | Description | Status |
-|:---|:---:|:---|:---:|
-| **`gemini-3.1-flash-lite`** | Google Cloud | Lightweight high-throughput free-tier inference | 🟢 100% Stable |
-| **`gemini-flash-lite-latest`** | Google Cloud | Production Flash Lite endpoint (Zero 503 errors) | 🟢 100% Stable |
+| Model Identifier | Provider | Description | Response Time | Status |
+|:---|:---:|:---|:---:|:---:|
+| **`gemini-3.1-flash-lite`** | Google Cloud Bridge | Ultra-fast high-throughput OpenAI format proxy | **~1.8s** | 🟢 100% Stable |
+| **`qwen2.5:7b-instruct`** | Docker Ollama | 10-Thread CPU accelerated local coding model | **~0.5s** | 🟢 100% Stable |
 
 ---
 

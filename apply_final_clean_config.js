@@ -1,4 +1,6 @@
-# ════════════════════════════════════════════════════════════════════
+const fs = require('fs');
+
+const configYaml = `# ════════════════════════════════════════════════════════════════════
 #  MSA AI — Continue IDE Config (High-Performance Engine v2.3)
 #  Primary endpoint: http://localhost:20131/v1  (Docker MSA Router)
 #  Direct Ollama:    http://localhost:11435     (Docker Ollama Engine)
@@ -40,3 +42,9 @@ tabAutocompleteModel:
   provider: ollama
   model: qwen2.5:0.5b
   apiBase: http://localhost:11435
+`;
+
+fs.writeFileSync('C:\\Users\\MD SADIQUE AMIN\\.continue\\config.yaml', configYaml, { encoding: 'utf8' });
+fs.writeFileSync('D:\\current using file\\8-17-2026\\config.yaml.final', configYaml, { encoding: 'utf8' });
+
+console.log('✅ Final optimized Continue configuration written.');
