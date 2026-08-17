@@ -1,6 +1,6 @@
 <!-- ========== 1. DYNAMIC HEADER BANNER (CAPSULE RENDER) ========== -->
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0ea5e9,50:6366f1,100:a855f7&height=220&section=header&text=MSA%20AI%20-%20Intelligent%20Router&fontSize=36&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Zero-Cost%20Local-First%20AI%20Routing%20%26%20Dockerized%20LLM%20Mesh&descSize=17&descAlignY=62&descAlign=50" width="100%" alt="MSA AI Router Banner" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0ea5e9,50:6366f1,100:a855f7&height=220&section=header&text=MSA%20AI%20-%20Intelligent%20Router&fontSize=36&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Zero-Cost%20Local-First%20AI%20Routing%20and%20Dockerized%20LLM%20Mesh&descSize=17&descAlignY=62&descAlign=50" width="100%" alt="MSA AI Router Banner" />
 </p>
 
 <!-- ========== 2. ANIMATED TYPING SVG BANNER ========== -->
@@ -293,7 +293,7 @@ powershell -ExecutionPolicy Bypass -File "final_full_audit.ps1"
 
 [7/7] Checking Continue Config & Icon Assets...
   Config.yaml : OK
-  D:\ Icons   : OK (.ico + .png)
+  Assets Icons: OK (.ico + .png)
   GUI Logos   : OK (msa-ai.png)
   -> PASS: All configs and assets verified
 
@@ -306,16 +306,15 @@ powershell -ExecutionPolicy Bypass -File "final_full_audit.ps1"
 
 ## 9. Custom Brand Assets & Iconography
 
-Custom high-resolution brand assets generated and converted:
+Custom high-resolution brand assets included directly in the repository:
 
 <p align="center">
-  <img src="D:\My_Self_Details\youtube content\icons\msa-ai-icon.png" width="160" alt="MSA AI Brand Icon" />
+  <img src="assets/msa-ai-icon.png" width="160" alt="MSA AI Brand Icon" />
 </p>
 
-* **Icon Assets Path:** `D:\My_Self_Details\youtube content\icons\`
-  * `msa-ai-icon.ico` (Multi-resolution Windows Icon)
-  * `msa-ai-icon.png` (High-Res 256x256 Brand Logo)
-  * `msa-ai-icon-flat.jpg` (Flat Vector Variant)
+* **Repository Assets:** `assets/`
+  * `assets/msa-ai-icon.ico` (Multi-resolution Windows Icon)
+  * `assets/msa-ai-icon.png` (High-Res 256x256 Brand Logo)
 
 ---
 
