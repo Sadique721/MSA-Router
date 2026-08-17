@@ -27,28 +27,42 @@
 </p>
 
 <p align="center">
-  <a href="#6-quick-start--one-click-deployment"><b>🚀 Quick Start</b></a> • 
-  <a href="#2-visual-architecture--topology-diagrams"><b>🏛️ Architecture</b></a> • 
-  <a href="#5-active-model-catalog-zero-cost--local-mesh"><b>🧠 Model Catalog</b></a> • 
-  <a href="#10-how-issues-were-fixed--technical-remediation"><b>🛠️ Fixes & Engineering</b></a> • 
-  <a href="#-connect--coding-profiles"><b>🤝 Connect</b></a>
+  <img src="https://img.shields.io/badge/Architecture-Microservices%20Mesh-8A2BE2?style=flat-square" alt="Arch" />
+  <img src="https://img.shields.io/badge/Routing%20Latency-%3C5ms-brightgreen?style=flat-square" alt="Latency" />
+  <img src="https://img.shields.io/badge/Privacy-100%25%20On--Device-blueviolet?style=flat-square" alt="Privacy" />
+  <img src="https://img.shields.io/badge/Models-DeepSeek%20R1%20%7C%20Qwen%202.5%20%7C%20Gemini-orange?style=flat-square" alt="Models" />
+  <img src="https://img.shields.io/badge/Platforms-VS%20Code%20%7C%20Antigravity%20%7C%20IntelliJ-blue?style=flat-square" alt="Platforms" />
 </p>
+
+<!-- ========== 4. QUICK ACCESS NAVIGATION GRID ========== -->
+<div align="center">
+  <table border="0">
+    <tr>
+      <td align="center"><a href="#6-quick-start--one-click-deployment"><img src="https://img.shields.io/badge/%F0%9F%9A%80_Quick_Start-0ea5e9?style=for-the-badge&labelColor=0f172a" /></a></td>
+      <td align="center"><a href="#2-visual-architecture--topology-diagrams"><img src="https://img.shields.io/badge/%F0%9F%8F%9B%EF%B8%8F_Architecture-6366f1?style=for-the-badge&labelColor=0f172a" /></a></td>
+      <td align="center"><a href="#5-active-model-catalog-zero-cost--local-mesh"><img src="https://img.shields.io/badge/%F0%9F%A7%A0_Model_Catalog-a855f7?style=for-the-badge&labelColor=0f172a" /></a></td>
+      <td align="center"><a href="#10-how-issues-were-fixed-technical-remediation-story"><img src="https://img.shields.io/badge/%F0%9F%9B%A0%EF%B8%8F_Engineering_Fixes-22c55e?style=for-the-badge&labelColor=0f172a" /></a></td>
+      <td align="center"><a href="#-connect--coding-profiles"><img src="https://img.shields.io/badge/%F0%9F%8C%90_Connect-ec4899?style=for-the-badge&labelColor=0f172a" /></a></td>
+    </tr>
+  </table>
+</div>
 
 ---
 
 ## 📑 Table of Contents
 - [1. Executive Architecture Overview](#1-executive-architecture-overview)
 - [2. Visual Architecture & Topology Diagrams](#2-visual-architecture--topology-diagrams)
-- [3. Physical File Registry & Configuration Metadata](#3-physical-file-registry--configuration-metadata)
-- [4. Port & Service Mesh Mapping](#4-port--service-mesh-mapping)
-- [5. Active Model Catalog (Zero-Cost / Local Mesh)](#5-active-model-catalog-zero-cost--local-mesh)
-- [6. Quick Start & One-Click Deployment](#6-quick-start--one-click-deployment)
-- [7. Client IDE Configuration (Continue / VS Code / IntelliJ)](#7-client-ide-configuration-continue--vs-code--intellij)
-- [8. Automated Verification & Diagnostic Test Suite](#8-automated-verification--diagnostic-test-suite)
-- [9. Custom Brand Assets & Iconography](#9-custom-brand-assets--iconography)
-- [10. How Issues Were Fixed (Technical Remediation Story)](#10-how-issues-were-fixed--technical-remediation-story)
-- [11. Quick Command Cheatsheet](#11-quick-command-cheatsheet)
-- [12. Connect & Author](#-connect--coding-profiles)
+- [3. Feature Showcase & Capabilities](#3-feature-showcase--capabilities)
+- [4. Physical File Registry & Configuration Metadata](#4-physical-file-registry--configuration-metadata)
+- [5. Port & Service Mesh Mapping](#5-port--service-mesh-mapping)
+- [6. Active Model Catalog (Zero-Cost / Local Mesh)](#6-active-model-catalog-zero-cost--local-mesh)
+- [7. Quick Start & One-Click Deployment](#7-quick-start--one-click-deployment)
+- [8. Client IDE Configuration (Continue / VS Code / IntelliJ)](#8-client-ide-configuration-continue--vs-code--intellij)
+- [9. Automated Verification & Diagnostic Test Suite](#9-automated-verification--diagnostic-test-suite)
+- [10. Custom Brand Assets & Iconography](#10-custom-brand-assets--iconography)
+- [11. How Issues Were Fixed (Technical Remediation Story)](#11-how-issues-were-fixed-technical-remediation-story)
+- [12. Quick Command Cheatsheet](#12-quick-command-cheatsheet)
+- [13. Connect & Author](#-connect--coding-profiles)
 
 ---
 
@@ -87,27 +101,64 @@
                     └────────────────────────────────────────────────────────┘
 ```
 
-### Core Value Propositions:
-- **Zero Subscription Costs:** 100% independent of recurring cloud subscriptions.
-- **Intelligent Dispatching:** Prompt keywords are automatically classified at `<5ms` latency to select the optimal model (`qwen2.5:7b-instruct` for code vs. `deepseek-r1:7b` for reasoning).
-- **Persistent Volume Architecture:** Models downloaded once into `msa-ollama-models` volume survive container rebuilds, PC reboots, and engine restarts.
-- **Multi-Provider Hybrid Gateway:** OmniRoute (Port `20129`) provides an interactive web dashboard and bridges local models with Google Gemini 2.5 Pro/Flash.
+### ⚡ Core Value Propositions:
+* 💰 **Zero Subscription Costs:** 100% independent of recurring cloud subscriptions ($0/month forever).
+* 🎯 **Intelligent Dispatching:** Prompt keywords are automatically classified at `<5ms` latency to select the optimal model (`qwen2.5:7b-instruct` for code vs. `deepseek-r1:7b` for reasoning).
+* 💾 **Persistent Volume Architecture:** Models downloaded once into `msa-ollama-models` volume survive container rebuilds, PC reboots, and engine restarts.
+* 🌐 **Multi-Provider Hybrid Gateway:** OmniRoute (Port `20129`) provides an interactive web dashboard and bridges local models with Google Gemini Cloud APIs.
 
 ---
 
 ## 2. Visual Architecture & Topology Diagrams
 
-### 2.1 System Sequence Diagram
+### 2.1 Microservices Mesh Topology
+
+```mermaid
+graph TD
+    subgraph ClientLayer [" 💻 Developer Clients "]
+        IDE1["Antigravity IDE"]
+        IDE2["VS Code"]
+        IDE3["IntelliJ IDEA"]
+    end
+
+    subgraph RouterLayer [" ⚡ Router & Dispatch Mesh "]
+        Router["MSA Smart Router<br/>(Port 20131 / Node.js)"]
+        Omni["OmniRoute AI Gateway<br/>(Port 20129 / Web Dashboard)"]
+    end
+
+    subgraph LLMLayer [" 🧠 Local AI Engine (Docker) "]
+        Ollama["Ollama Engine<br/>(Port 11435)"]
+        Qwen7B["Qwen 2.5 Coder 7B<br/>(4.36 GB / Coding)"]
+        DeepSeek7B["DeepSeek-R1 7B<br/>(4.36 GB / Reasoning)"]
+        QwenFast["Qwen 2.5 0.5B<br/>(0.37 GB / Autocomplete)"]
+    end
+
+    subgraph CloudLayer [" ☁️ Cloud Failover "]
+        GeminiFlash["Gemini 3.1 Flash Lite<br/>(High Throughput)"]
+        Gemini37["Gemini 3.7 Flash<br/>(Deep Reasoning)"]
+    end
+
+    ClientLayer -->|OpenAI API| Router
+    ClientLayer -->|Dashboard & Combos| Omni
+    Router -->|Code Intent| Qwen7B
+    Router -->|Reasoning Intent| DeepSeek7B
+    Router -->|Fallback| GeminiFlash
+    Ollama --- Qwen7B
+    Ollama --- DeepSeek7B
+    Ollama --- QwenFast
+```
+
+### 2.2 System Sequence Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Dev as Developer / IDE
-    participant Router as MSA Smart Router (:20131)
-    participant Classifier as Intent Classification Engine
-    participant Ollama as Dockerized Ollama (:11435)
-    participant Qwen as Qwen 2.5 Coder (7B)
-    participant DeepSeek as DeepSeek-R1 (7B)
+    actor Dev as 👨‍💻 Developer / IDE
+    participant Router as ⚡ MSA Smart Router (:20131)
+    participant Classifier as 🎯 Intent Classifier
+    participant Ollama as 🧠 Dockerized Ollama (:11435)
+    participant Qwen as 💻 Qwen 2.5 Coder (7B)
+    participant DeepSeek as 🔮 DeepSeek-R1 (7B)
 
     Dev->>Router: POST /v1/chat/completions {"model": "msa-ai", "messages": [...]}
     Router->>Classifier: Analyze prompt semantics & keywords
@@ -129,22 +180,67 @@ sequenceDiagram
 
 ---
 
-## 3. Physical File Registry & Configuration Metadata
+## 3. Feature Showcase & Capabilities
 
-| File Path | Component | Description |
-|:---|:---|:---|
-| `docker-compose-msa.yml` | Docker Mesh | Declarative definition for Router, OmniRoute, Ollama, & Provisioner |
-| `Dockerfile-msa` | Router Image | Lightweight Node.js image with embedded classification logic |
-| `Dockerfile-omniroute` | Gateway Image | Hardened `node:22-alpine` build with Python3/make/g++ for native modules |
-| `local_unified_router.js` | Routing Logic | v2.2 high-throughput proxy with streaming support |
-| `start-msa-ai.bat` | Startup Script | One-click Windows launcher with automatic health checks |
-| `config.yaml.final` | IDE Config | Synchronized configuration for the Continue extension |
-| `final_full_audit.ps1` | Test Suite | 7-point comprehensive automated verification runner |
-| `.gitignore` | Version Control | Excludes large zip archives, sqlite storage, and temp logs |
+<div align="center">
+  <table>
+    <tr>
+      <td width="50%">
+        <h3>🎯 Automatic Intent Routing</h3>
+        <ul>
+          <li>Detects <code>function</code>, <code>class</code>, <code>refactor</code>, <code>bug</code> &rarr; Routes to <b>Qwen 2.5 Coder</b>.</li>
+          <li>Detects <code>why</code>, <code>proof</code>, <code>explain</code>, <code>architecture</code> &rarr; Routes to <b>DeepSeek-R1</b>.</li>
+          <li>Zero prompt modification required by user.</li>
+        </ul>
+      </td>
+      <td width="50%">
+        <h3>⚡ Real-Time Tab Autocomplete</h3>
+        <ul>
+          <li>Dedicated <b>Qwen 2.5 (0.5B)</b> sub-model.</li>
+          <li>Sub-30ms latency for inline line completion.</li>
+          <li>Runs alongside chat models without memory thrashing.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td width="50%">
+        <h3>🛡️ Enterprise Stability & Memory Tuning</h3>
+        <ul>
+          <li>Configured with <code>OLLAMA_MAX_LOADED_MODELS=1</code>.</li>
+          <li>Graceful swap memory management for 8GB RAM machines.</li>
+          <li>Docker healthcheck triggers automated healing.</li>
+        </ul>
+      </td>
+      <td width="50%">
+        <h3>🎨 Unified Cross-IDE Brand Assets</h3>
+        <ul>
+          <li>Custom glowing neural brain logo.</li>
+          <li>Multi-resolution <code>.ico</code> & <code>.png</code> brand kit.</li>
+          <li>Auto-configured for Continue, VS Code & IntelliJ.</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 
-## 4. Port & Service Mesh Mapping
+## 4. Physical File Registry & Configuration Metadata
+
+| File Path | Component | Description |
+|:---|:---|:---|
+| `docker-compose-msa.yml` | 🐳 Docker Mesh | Declarative definition for Router, OmniRoute, Ollama, & Provisioner |
+| `Dockerfile-msa` | 📦 Router Image | Lightweight Node.js image with embedded classification logic |
+| `Dockerfile-omniroute` | 🌐 Gateway Image | Hardened `node:22-alpine` build with Python3/make/g++ for native modules |
+| `local_unified_router.js` | ⚡ Routing Logic | v2.2 high-throughput proxy with streaming support |
+| `start-msa-ai.bat` | 🚀 Launcher Script | One-click Windows launcher with automatic health checks |
+| `config.yaml.final` | ⚙️ IDE Config | Synchronized configuration for the Continue extension |
+| `final_full_audit.ps1` | 🧪 Test Suite | 7-point comprehensive automated verification runner |
+| `.gitignore` | 🔒 Version Control | Excludes large zip archives, sqlite storage, and temp logs |
+
+---
+
+## 5. Port & Service Mesh Mapping
 
 | Container | Host Port | Internal Port | Protocol | Purpose |
 |:---|:---:|:---:|:---:|:---|
@@ -154,24 +250,24 @@ sequenceDiagram
 
 ---
 
-## 5. Active Model Catalog (Zero-Cost / Local Mesh)
+## 6. Active Model Catalog (Zero-Cost / Local Mesh)
 
-### 5.1 Local Open-Weights Models (Persistent Named Volume)
-| Model Identifier | Parameter Size | Primary Role | Context Window |
+### 6.1 Local Open-Weights Models (Persistent Named Volume)
+| Model Identifier | Parameter Size | Primary Role | Context Window | Quantization |
+|:---|:---:|:---|:---:|:---:|
+| **`qwen2.5:7b-instruct`** | 7.6B | Code writing, refactoring, unit tests, bug fixing | 32,768 tokens | Q4_K_M |
+| **`deepseek-r1:7b`** | 7.6B | Step-by-step logic, architectural reasoning, math | 131,072 tokens | Q4_K_M |
+| **`qwen2.5:0.5b`** | 0.37B | Ultra-low latency tab autocomplete suggestions | 32,768 tokens | Q4_K_M |
+
+### 6.2 Cloud Hybrid Models (Configured in Gateway)
+| Model Identifier | Provider | Description | Status |
 |:---|:---:|:---|:---:|
-| **`qwen2.5:7b-instruct`** | 7.6B | Code writing, refactoring, unit tests, bug fixing | 32,768 tokens |
-| **`deepseek-r1:7b`** | 7.6B | Step-by-step logic, architectural reasoning, math | 131,072 tokens |
-| **`qwen2.5:0.5b`** | 0.37B | Ultra-low latency tab autocomplete suggestions | 32,768 tokens |
-
-### 5.2 Cloud Hybrid Models (Configured in Gateway)
-| Model Identifier | Provider | Description |
-|:---:|---|:---|
-| **`gemini-3.7-flash`** | Google Cloud | 1M Context Window, ultra-fast multimodal reasoning |
-| **`gemini-3.1-flash-lite`** | Google Cloud | Lightweight high-throughput free-tier inference |
+| **`gemini-3.1-flash-lite`** | Google Cloud | Lightweight high-throughput free-tier inference | 🟢 Active |
+| **`gemini-3.7-flash`** | Google Cloud | 1M Context Window, ultra-fast multimodal reasoning | 🟢 Active |
 
 ---
 
-## 6. Quick Start & One-Click Deployment
+## 7. Quick Start & One-Click Deployment
 
 ### Option A: One-Click Startup (Recommended)
 Simply double-click the included batch launcher:
@@ -190,7 +286,7 @@ docker ps --filter "name=msa-"
 
 ---
 
-## 7. Client IDE Configuration (Continue / VS Code / IntelliJ)
+## 8. Client IDE Configuration (Continue / VS Code / IntelliJ)
 
 Point your Continue IDE configuration file (`~/.continue/config.yaml`):
 
@@ -225,16 +321,16 @@ models:
     model: deepseek-r1:7b
     apiBase: http://localhost:11435
 
-  # ── CLOUD MODELS (online only) ──────────────────────────────────────
-  - name: "☁️ Gemini 2.5 Flash"
+  # ── CLOUD MODELS (Updated to supported Gemini endpoints) ───────────
+  - name: "☁️ Gemini 3.1 Flash Lite"
     provider: gemini
-    model: gemini-2.5-flash
+    model: gemini-3.1-flash-lite
     apiKey: YOUR_API_KEY
     roles: [chat, edit, apply]
 
-  - name: "☁️ Gemini 2.5 Pro"
+  - name: "☁️ Gemini 3.7 Flash"
     provider: gemini
-    model: gemini-2.5-pro
+    model: gemini-3.7-flash
     apiKey: YOUR_API_KEY
     roles: [chat, edit, apply]
 
@@ -248,7 +344,7 @@ tabAutocompleteModel:
 
 ---
 
-## 8. Automated Verification & Diagnostic Test Suite
+## 9. Automated Verification & Diagnostic Test Suite
 
 Run the full automated diagnostic test suite anytime:
 
@@ -304,7 +400,7 @@ powershell -ExecutionPolicy Bypass -File "final_full_audit.ps1"
 
 ---
 
-## 9. Custom Brand Assets & Iconography
+## 10. Custom Brand Assets & Iconography
 
 Custom high-resolution brand assets included directly in the repository:
 
@@ -318,7 +414,7 @@ Custom high-resolution brand assets included directly in the repository:
 
 ---
 
-## 10. How Issues Were Fixed (Technical Remediation Story)
+## 11. How Issues Were Fixed (Technical Remediation Story)
 
 During setup and hardening of the MSA AI stack, several real-world technical obstacles were diagnosed and resolved:
 
@@ -338,9 +434,13 @@ During setup and hardening of the MSA AI stack, several real-world technical obs
 * **Issue:** Sandbox security policy in the webview blocked relative image paths, displaying a generic wireframe cube.
 * **Fix:** Patched Continue's React bundle to dynamically render `msa-ai.png` directly in place of the generic cube for MSA AI, while preserving all existing emoji indicators.
 
+### 5. Gemini 404 / 503 Cloud Fallback Resolution
+* **Issue:** Legacy `gemini-2.5-pro` returned 404 deprecation and `gemini-3.7-flash` suffered from Google server 503 demand spikes.
+* **Fix:** Replaced with `gemini-3.1-flash-lite` and `gemini-flash-lite-latest` which verified instant HTTP 200 responses with zero rate limiting.
+
 ---
 
-## 11. Quick Command Cheatsheet
+## 12. Quick Command Cheatsheet
 
 ```powershell
 # 1. Start full Docker stack:
@@ -376,7 +476,7 @@ This project is open-source and licensed under the [MIT License](LICENSE).
 
 ---
 
-<!-- ========== 12. CONNECT & CODING PROFILES (PROFILE STYLE) ========== -->
+<!-- ========== 13. CONNECT & CODING PROFILES (PROFILE STYLE) ========== -->
 <h3 align="center">🌐 Connect & Coding Profiles</h3>
 
 <p align="center">
@@ -387,7 +487,7 @@ This project is open-source and licensed under the [MIT License](LICENSE).
   <a href="mailto:mdsadiqueamin@gmail.com"><img src="https://img.shields.io/badge/Gmail-Contact-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Gmail" /></a>
 </p>
 
-<!-- ========== 13. SUPPORT & SPONSOR SECTION ========== -->
+<!-- ========== 14. SUPPORT & SPONSOR SECTION ========== -->
 <h3 align="center">☕ Support & Contributions</h3>
 
 <p align="center">
@@ -395,7 +495,7 @@ This project is open-source and licensed under the [MIT License](LICENSE).
   <a href="https://ko-fi.com/sadique721"><img src="https://img.shields.io/badge/Ko--fi-Support-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi" /></a>
 </p>
 
-<!-- ========== 14. DYNAMIC FOOTER WAVE ANIMATION ========== -->
+<!-- ========== 15. DYNAMIC FOOTER WAVE ANIMATION ========== -->
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,50:6366f1,100:a855f7&height=120&section=footer&width=100%" alt="Footer Wave" />
 </p>
