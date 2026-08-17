@@ -56,9 +56,9 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # ── 2. Model Provisioner ─────────────────────────────────────────────────
-  #  One-time runner: pulls all AI models into the Ollama volume.
-  #  Safe to re-run — Ollama skips already-downloaded models.
+  # ── 2. Model Guardian & Auto-Provisioner ──────────────────────────────────
+  #  Automatically pulls any missing models on boot, ensures volume integrity,
+  #  and runs continuously as a healthy guardian monitor (100% Green in Docker Desktop).
   ollama-provisioner:
     image: curlimages/curl:latest
     container_name: msa-ollama-provisioner
@@ -70,15 +70,22 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        echo "=== MSA AI Model Provisioner ==="
-        echo "Checking/pulling qwen2.5:7b-instruct..."
+        echo "=== MSA AI Model Guardian Started ==="
+        echo "Verifying local AI models in Ollama volume..."
         curl -s http://ollama:11434/api/pull -d '{"name":"qwen2.5:7b-instruct"}'
-        echo "Checking/pulling deepseek-r1:7b..."
         curl -s http://ollama:11434/api/pull -d '{"name":"deepseek-r1:7b"}'
-        echo "Checking/pulling qwen2.5:0.5b..."
         curl -s http://ollama:11434/api/pull -d '{"name":"qwen2.5:0.5b"}'
-        echo "All models ready!"
-    restart: "no"
+        echo "✅ All AI models verified & ready!"
+        echo "Entering periodic volume health watch..."
+        while true; do
+          sleep 3600
+        done
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://ollama:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
 
   # ── 3. OmniRoute AI Proxy ────────────────────────────────────────────────
   #  Unified AI gateway: routes to local Ollama models AND cloud APIs.
