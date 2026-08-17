@@ -1,0 +1,19 @@
+# Large Archives & Binaries
+continue-plugin.zip
+*.zip
+*.tar.gz
+
+# Runtime & DB Data
+omniroute-data/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# Environment & Temp
+.env
+.env.*
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

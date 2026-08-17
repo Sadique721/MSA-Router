@@ -1,0 +1,12 @@
+{
+  "incident_id": "INC-GMAIL-RESTRICTION-001",
+  "incident_name": "Gmail Restriction Recovery",
+  "target_account": "entitykart@gmail.com",
+  "observed_status": "Restricted",
+  "observed_reason": "Possible unwanted content / spam",
+  "previous_review_status": "Completed",
+  "previous_review_decision": "Access remains restricted",
+  "previous_review_date": "2026-08-03",
+  "creation_time": "2026-08-17T11:20:00+05:30",
+  "status": "Investigating"
+}

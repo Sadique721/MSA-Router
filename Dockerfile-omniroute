@@ -1,0 +1,31 @@
+# MSA AI — OmniRoute Dockerfile  v2.2
+#
+# Uses node:22-alpine with full build tools.
+# omniroute@3.7.9 contains better-sqlite3 (native C++ addon) which requires:
+#   - Python 3    (for node-gyp)
+#   - make + g++  (C++ compiler)
+#   - node:22     (required by undici >=22.19.0)
+#
+FROM node:22-alpine
+
+# Install build tools for native addons (better-sqlite3 → node-gyp)
+# + wget/curl for healthcheck and diagnostics
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    wget \
+    curl
+
+# Install OmniRoute globally (--legacy-peer-deps silences emoji-mart peer conflict)
+RUN npm install -g omniroute@3.7.9 --legacy-peer-deps
+
+# OmniRoute config is mounted from host at runtime:
+#   ./omniroute-data  →  /root/.omniroute
+
+EXPOSE 20129
+
+HEALTHCHECK --interval=15s --timeout=10s --start-period=30s --retries=8 \
+  CMD wget -qO- http://localhost:20129/v1/models || exit 1
+
+CMD ["omniroute", "serve", "--port", "20129", "--host", "0.0.0.0", "--no-open"]

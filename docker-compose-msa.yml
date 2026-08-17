@@ -1,0 +1,147 @@
+# MSA AI — Production Docker Compose  v2.0
+# ════════════════════════════════════════════════════════════════════════════
+#  Unified, offline, self-contained AI assistant stack.
+#  All containers use "restart: unless-stopped" → auto-start after reboot
+#  as long as Docker Desktop is configured to start on boot.
+#
+#  PORT MAP (host → container):
+#    11435  → msa-ollama     Ollama LLM engine      ← raw model access
+#    20129  → msa-omniroute  OmniRoute AI proxy      ← cloud + local routing
+#             healthcheck:  GET /v1/models  (no /health endpoint in OmniRoute)
+#    20131  → msa-router     MSA AI smart router     ← PRIMARY IDE endpoint
+#
+#  PRIMARY IDE ENDPOINT:  http://localhost:20131/v1
+#  OMNIROUTE DASHBOARD:   http://localhost:20129
+#
+#  USAGE AFTER REBOOT:
+#    Option A: Double-click  start-msa-ai.bat        (recommended)
+#    Option B: docker compose -f docker-compose-msa.yml up -d --build
+# ════════════════════════════════════════════════════════════════════════════
+
+networks:
+  msa-net:
+    name: msa-net
+    driver: bridge
+
+volumes:
+  # Persists ALL downloaded LLM model weights.
+  # Deleting / recreating containers NEVER deletes models.
+  msa-ollama-models:
+    name: msa-ollama-models
+
+services:
+
+  # ── 1. Ollama LLM Engine ─────────────────────────────────────────────────
+  #  Downloads and runs local AI models (Qwen, DeepSeek, etc.)
+  #  GPU acceleration is used automatically when available on the host.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: msa-ollama
+    networks:
+      - msa-net
+    ports:
+      - "11435:11434"
+    volumes:
+      - msa-ollama-models:/root/.ollama
+    environment:
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_KEEP_ALIVE=5m
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # ── 2. Model Provisioner ─────────────────────────────────────────────────
+  #  One-time runner: pulls all AI models into the Ollama volume.
+  #  Safe to re-run — Ollama skips already-downloaded models.
+  ollama-provisioner:
+    image: curlimages/curl:latest
+    container_name: msa-ollama-provisioner
+    networks:
+      - msa-net
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "=== MSA AI Model Provisioner ==="
+        echo "Checking/pulling qwen2.5:7b-instruct..."
+        curl -s http://ollama:11434/api/pull -d '{"name":"qwen2.5:7b-instruct"}'
+        echo "Checking/pulling deepseek-r1:7b..."
+        curl -s http://ollama:11434/api/pull -d '{"name":"deepseek-r1:7b"}'
+        echo "Checking/pulling qwen2.5:0.5b..."
+        curl -s http://ollama:11434/api/pull -d '{"name":"qwen2.5:0.5b"}'
+        echo "All models ready!"
+    restart: "no"
+
+  # ── 3. OmniRoute AI Proxy ────────────────────────────────────────────────
+  #  Unified AI gateway: routes to local Ollama models AND cloud APIs.
+  #  Supports: Gemini, OpenAI, Anthropic, + ollama-local/* models.
+  #  OmniRoute config is persisted in host folder ./omniroute-data/
+  #  Dashboard: http://localhost:20129
+  omniroute:
+    build:
+      context: .
+      dockerfile: Dockerfile-omniroute
+    image: msa-omniroute:latest
+    container_name: msa-omniroute
+    networks:
+      - msa-net
+    ports:
+      - "20129:20129"
+    volumes:
+      - ./omniroute-data:/root/.omniroute
+    environment:
+      - PORT=20129
+      - OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      # OmniRoute has no /health — use /v1/models which is confirmed working
+      test: ["CMD", "wget", "-qO-", "http://localhost:20129/v1/models"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+    restart: unless-stopped
+
+  # ── 4. MSA AI Intelligent Router ─────────────────────────────────────────
+  #  Single unified endpoint for ALL IDEs and editors.
+  #  Classifies each prompt by content and routes to the best model:
+  #    • Coding / General  → qwen2.5:7b-instruct  (via Ollama direct)
+  #    • Reasoning / Logic → deepseek-r1:7b        (via Ollama direct)
+  #
+  #  In DIRECT_MODE (OLLAMA_URL set) → talks directly to Ollama container.
+  #  Host endpoint:  http://localhost:20131/v1
+  msa-router:
+    build:
+      context: .
+      dockerfile: Dockerfile-msa
+    image: msa-router:latest
+    container_name: msa-router
+    networks:
+      - msa-net
+    ports:
+      - "20131:20130"
+    depends_on:
+      ollama:
+        condition: service_healthy
+      omniroute:
+        condition: service_started
+    environment:
+      - PORT=20130
+      - OLLAMA_URL=http://ollama:11434
+      - OMNIROUTE_URL=http://omniroute:20129/v1/chat/completions
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:20130/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped

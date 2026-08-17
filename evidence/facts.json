@@ -1,0 +1,51 @@
+[
+  {
+    "fact_id": "FACT-001",
+    "source": "User screenshot description",
+    "timestamp": "2026-08-03T00:00:00Z",
+    "confidence": "CONFIRMED",
+    "description": "Gmail access is restricted for entitykart@gmail.com."
+  },
+  {
+    "fact_id": "FACT-002",
+    "source": "User screenshot description",
+    "timestamp": "2026-08-03T00:00:00Z",
+    "confidence": "CONFIRMED",
+    "description": "Google states that Gmail was used to send unwanted content / spam."
+  },
+  {
+    "fact_id": "FACT-003",
+    "source": "User screenshot description",
+    "timestamp": "2026-08-03T00:00:00Z",
+    "confidence": "CONFIRMED",
+    "description": "A previous restriction review request was completed by Google."
+  },
+  {
+    "fact_id": "FACT-004",
+    "source": "User screenshot description",
+    "timestamp": "2026-08-03T00:00:00Z",
+    "confidence": "CONFIRMED",
+    "description": "Access remained restricted after the Google decision dated 2026-08-03."
+  },
+  {
+    "fact_id": "FACT-005",
+    "source": "User screenshot description",
+    "timestamp": "2026-08-03T00:00:00Z",
+    "confidence": "CONFIRMED",
+    "description": "The affected account under restriction is entitykart@gmail.com."
+  },
+  {
+    "fact_id": "FACT-006",
+    "source": "System environment variables",
+    "timestamp": "2026-08-17T11:11:28+05:30",
+    "confidence": "CONFIRMED",
+    "description": "The current active environment configuration uses MAIL_USERNAME=mdsadiqueamin721721@gmail.com and MAIL_PASSWORD=girseqjctzqpgmls, rather than the restricted email."
+  },
+  {
+    "fact_id": "FACT-007",
+    "source": "entitykart-enterprise-ecommerce-microservices project history",
+    "timestamp": "2026-08-15T10:39:00Z",
+    "confidence": "CONFIRMED",
+    "description": "The microservices project history lists the original SMTP Sender Email as entitykart@gmail.com with a configured Google App Password."
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "missing_data_id": "MISSING-DATA-001",
+    "data_type": "Google Security Activity & Devices Log",
+    "reason": "Live Google Account UI is not programmatically accessible to the agent environment.",
+    "required_action": "User must manually log into the Google Account console and inspect the 'Security' tab for suspicious devices or login events."
+  },
+  {
+    "missing_data_id": "MISSING-DATA-002",
+    "data_type": "Gmail Sent Mail History",
+    "reason": "Gmail service is restricted, and live mailbox logs are not accessible via API or programmatically to the agent.",
+    "required_action": "User should check the 'Sent' folder of the account (if webmail remains partially accessible) or review system server logs to verify exact sent counts and message bodies."
+  },
+  {
+    "missing_data_id": "MISSING-DATA-003",
+    "data_type": "Google Account OAuth Grants & API Keys",
+    "reason": "Third-party application access settings are hosted on Google's live server dashboard and are unavailable to the agent.",
+    "required_action": "User must inspect the Google Account Security panel under 'Third-party apps with account access' and verify all active client IDs, scopes, and revocations."
+  }
+]

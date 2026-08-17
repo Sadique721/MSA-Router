@@ -1,0 +1,13 @@
+# MSA AI .dockerignore
+# Keeps Docker build context clean and fast
+
+node_modules/
+npm-debug.log
+*.log
+.git/
+.gitignore
+*.md
+scratch/
+test_*.js
+*.test.js
+*.spec.js

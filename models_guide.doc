@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AI Models Capability & Selection Guide</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 40px; }
+  h1 { color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; }
+  h2 { color: #1d4ed8; margin-top: 30px; }
+  h3 { color: #2563eb; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+  th { background-color: #f3f4f6; color: #1f2937; }
+  tr:nth-child(even) { background-color: #f9fafb; }
+  .badge-free { background-color: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+  .badge-paid { background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>AI Models Capability &amp; Selection Guide</h1>
+<p>This guide details the specific capabilities, optimal use cases, and limitations of the models configured in your Continue panel dropdown.</p>
+
+<h2>1. Model Capabilities Matrix</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Model Name</th>
+      <th>Type</th>
+      <th>Best Use Case</th>
+      <th>Vision (Image Input)</th>
+      <th>Video / Audio Input</th>
+      <th>Document Generation</th>
+      <th>Image / Video Gen</th>
+      <th>Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Local Qwen 2.5 Coder</b></td>
+      <td>Offline (Local)</td>
+      <td>Code Writing, Autocomplete, Refactoring</td>
+      <td>❌ No</td>
+      <td>❌ No</td>
+      <td>✅ Yes (MD/Docstrings)</td>
+      <td>❌ No</td>
+      <td><span class="badge-free">Free</span></td>
+    </tr>
+    <tr>
+      <td><b>Local DeepSeek R1</b></td>
+      <td>Offline (Local)</td>
+      <td>Algorithmic Logic, Deep Reasoning, Math</td>
+      <td>❌ No</td>
+      <td>❌ No</td>
+      <td>✅ Yes (MD/Logic Docs)</td>
+      <td>❌ No</td>
+      <td><span class="badge-free">Free</span></td>
+    </tr>
+    <tr>
+      <td><b>Gemini 3 Pro Preview</b></td>
+      <td>Cloud (API)</td>
+      <td>Complex Codebases, Large Context Docs</td>
+      <td>✅ Yes</td>
+      <td>✅ Yes (High Quality)</td>
+      <td>✅ Yes (All formats)</td>
+      <td>❌ No</td>
+      <td><span class="badge-paid">Paid</span></td>
+    </tr>
+    <tr>
+      <td><b>Gemini 3 Flash Preview</b></td>
+      <td>Cloud (API)</td>
+      <td>Fast Chat, Real-time Screenshot Analysis</td>
+      <td>✅ Yes</td>
+      <td>✅ Yes (Fast)</td>
+      <td>✅ Yes (Fast text)</td>
+      <td>❌ No</td>
+      <td><span class="badge-paid">Paid</span></td>
+    </tr>
+    <tr>
+      <td><b>OmniRoute Auto Free Coding</b></td>
+      <td>Cloud (Free)</td>
+      <td>General Programming Chat</td>
+      <td>❌ No</td>
+      <td>❌ No</td>
+      <td>✅ Yes (Basic)</td>
+      <td>❌ No</td>
+      <td><span class="badge-free">Free</span></td>
+    </tr>
+    <tr>
+      <td><b>OmniRoute Free AI (HY3)</b></td>
+      <td>Cloud (Free)</td>
+      <td>General Chat, Fast Code Edits</td>
+      <td>❌ No</td>
+      <td>❌ No</td>
+      <td>✅ Yes (Basic)</td>
+      <td>❌ No</td>
+      <td><span class="badge-free">Free</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>2. Detailed Selection Guide</h2>
+
+<h3>💻 For Coding and Development</h3>
+<ul>
+  <li><b>Offline / Local Default:</b> Use <b>Local Qwen 2.5 Coder (Offline)</b>. It runs directly on your computer, meaning it has zero latency, zero token limits, and works offline. Excellent for writing code blocks, refactoring, and auto-completing.</li>
+  <li><b>Complex Bugs &amp; Algorithms:</b> Use <b>Local DeepSeek R1 (Offline)</b>. It uses reasoning tokens to think through complex math, logical bugs, and algorithm design before outputting code.</li>
+  <li><b>Free Cloud Fallback:</b> Use <b>OmniRoute Auto Free Coding</b> if you want cloud performance without using your API key.</li>
+</ul>
+
+<h3>🖼️ For Vision, UI &amp; Screenshots</h3>
+<ul>
+  <li><b>Reading Screenshots:</b> Only <b>Gemini 3 Pro Preview</b> or <b>Gemini 3 Flash Preview</b> can read screenshots or images. If you need to debug a UI issue or write code based on a mockup, paste the image and use one of these models.</li>
+  <li><b>Image Generation (Text-to-Image):</b> None of these models can generate raw JPG/PNG images directly inside the chat panel. However, you can ask them to write code (like SVG, HTML Canvas, or Python PIL script) to draw graphics.</li>
+</ul>
+
+<h3>🎥 For Video &amp; Audio (Multimedia)</h3>
+<ul>
+  <li><b>Analyzing Media Files:</b> Use <b>Gemini 3 Pro</b> or <b>Gemini 3 Flash</b>. They are native multimodal models that can process video clips and audio logs to summarize contents, describe frames, or extract text transcriptions.</li>
+</ul>
+
+<h3>📄 For Writing Technical Documents (.md / .doc)</h3>
+<ul>
+  <li><b>Documentation &amp; Specs:</b> Use <b>Gemini 3 Pro</b> for writing heavy, structured documentation (Markdown tables, RTF formats). For local drafts, <b>Local Qwen 2.5 Coder</b> can write clean markdown tutorials and README files.</li>
+</ul>
+
+<hr>
+<p><i>Note: All local models (Qwen and DeepSeek) run offline on your machine using Ollama. Cloud models (Gemini Pro/Flash) use your configured API Key.</i></p>
+
+</body>
+</html>

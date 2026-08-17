@@ -1,0 +1,93 @@
+[
+  {
+    "hypothesis_id": "H1",
+    "name": "Account compromise",
+    "score": 1,
+    "confidence_class": "POSSIBLE",
+    "rationale": "No direct evidence of unauthorized logins or sessions exists in the local code or environment config, but live session logs on Google are currently UNKNOWN."
+  },
+  {
+    "hypothesis_id": "H2",
+    "name": "OAuth compromise",
+    "score": 1,
+    "confidence_class": "POSSIBLE",
+    "rationale": "The application uses local App Passwords for SMTP. Google OAuth client IDs and scopes are clean locally, but live console grants are UNKNOWN."
+  },
+  {
+    "hypothesis_id": "H3",
+    "name": "Malicious/unsafe browser extension",
+    "score": 1,
+    "confidence_class": "UNKNOWN",
+    "rationale": "No browser extension audits can be completed programmatically by the agent."
+  },
+  {
+    "hypothesis_id": "H4",
+    "name": "Bulk sending",
+    "score": 4,
+    "confidence_class": "STRONGLY SUPPORTED",
+    "rationale": "The microservices architecture triggers automated transactional emails for order placement, confirmation, shipping, delivery, returns, and payment events. Developer testing or seeding cycles create bulk sending volume."
+  },
+  {
+    "hypothesis_id": "H5",
+    "name": "Unsolicited email",
+    "score": 2,
+    "confidence_class": "POSSIBLE",
+    "rationale": "If local testing used placeholder customer addresses, these would result in high bounce rates, which Google flags as spam activity."
+  },
+  {
+    "hypothesis_id": "H6",
+    "name": "Job-application automation",
+    "score": 0,
+    "confidence_class": "DISPROVED",
+    "rationale": "No job application automation libraries or configs are present in the repository."
+  },
+  {
+    "hypothesis_id": "H7",
+    "name": "Automation misconfiguration",
+    "score": 5,
+    "confidence_class": "CONFIRMED",
+    "rationale": "The application lacks sandbox controls, sends actual emails in development/testing environments, and records optimistic 'SENT' status in database logs, obscuring SMTP transport errors."
+  },
+  {
+    "hypothesis_id": "H8",
+    "name": "Excessive sending frequency",
+    "score": 4,
+    "confidence_class": "STRONGLY SUPPORTED",
+    "rationale": "Kafka listener threads trigger asynchronous email sends in parallel. Google's personal SMTP servers block high-frequency, parallel connection bursts."
+  },
+  {
+    "hypothesis_id": "H9",
+    "name": "Repeated message pattern",
+    "score": 4,
+    "confidence_class": "STRONGLY SUPPORTED",
+    "rationale": "Sending identical welcome and order HTML email structures (only differing by order IDs/names) in close succession triggers Gmail content spam filters."
+  },
+  {
+    "hypothesis_id": "H10",
+    "name": "Recipient complaints/spam reports",
+    "score": 2,
+    "confidence_class": "POSSIBLE",
+    "rationale": "Bounced emails from unverified test domains or mock users trigger automated Google abuse signals."
+  },
+  {
+    "hypothesis_id": "H11",
+    "name": "Unknown third-party integration",
+    "score": 1,
+    "confidence_class": "POSSIBLE",
+    "rationale": "No unknown integrations found in local project configurations."
+  },
+  {
+    "hypothesis_id": "H12",
+    "name": "Google-side enforcement despite no local cause",
+    "score": 1,
+    "confidence_class": "DISPROVED",
+    "rationale": "A clear local cause exists: the local microservices project was configured to send transactional emails via entitykart@gmail.com with an App Password, with no rate limiters or dev-mode sandboxing."
+  },
+  {
+    "hypothesis_id": "H13",
+    "name": "Combination of multiple causes (H4 + H7 + H8 + H9)",
+    "score": 5,
+    "confidence_class": "CONFIRMED",
+    "rationale": "The combination of bulk transactional sends during local testing, lack of development sandboxing/throttling, rapid-fire parallel SMTP connections via @Async, and sending identical HTML message patterns directly resulted in Google flagging the personal account as a spam transmitter."
+  }
+]

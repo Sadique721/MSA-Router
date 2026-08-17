@@ -1,0 +1,19 @@
+# MSA AI Router — Production Dockerfile
+# Base: node:20-alpine (lightweight, ~130MB)
+FROM node:20-alpine
+
+# Install wget for Docker healthcheck
+RUN apk add --no-cache wget
+
+WORKDIR /app
+
+# Copy the unified router script
+COPY local_unified_router.js .
+
+EXPOSE 20130
+
+# Default env (overridden by docker-compose environment section)
+ENV PORT=20130
+ENV OLLAMA_URL=http://ollama:11434
+
+CMD ["node", "local_unified_router.js"]
