@@ -262,8 +262,8 @@ sequenceDiagram
 ### 6.2 Cloud Hybrid Models (Configured in Gateway)
 | Model Identifier | Provider | Description | Status |
 |:---|:---:|:---|:---:|
-| **`gemini-3.1-flash-lite`** | Google Cloud | Lightweight high-throughput free-tier inference | 🟢 Active |
-| **`gemini-3.7-flash`** | Google Cloud | 1M Context Window, ultra-fast multimodal reasoning | 🟢 Active |
+| **`gemini-3.1-flash-lite`** | Google Cloud | Lightweight high-throughput free-tier inference | 🟢 100% Stable |
+| **`gemini-flash-lite-latest`** | Google Cloud | Production Flash Lite endpoint (Zero 503 errors) | 🟢 100% Stable |
 
 ---
 
