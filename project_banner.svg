@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  
+  <rect width="800" height="300" rx="15" fill="url(#grad)" />
+  <rect width="800" height="300" rx="15" fill="url(#grid)" />
+  
+  <circle cx="700" cy="80" r="120" fill="rgba(255, 255, 255, 0.05)" />
+  <circle cx="730" cy="120" r="80" fill="rgba(255, 255, 255, 0.08)" />
+  <circle cx="100" cy="220" r="60" fill="rgba(255, 255, 255, 0.04)" />
+  
+  <rect x="50" y="50" width="700" height="200" rx="10" fill="rgba(0, 0, 0, 0.25)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" />
+  
+  <text x="90" y="115" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#ffffff" letter-spacing="0.5">MSA-Router</text>
+  <text x="90" y="145" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="400" fill="#e0f2fe" opacity="0.85">Intelligent Routing Engine & Gateway</text>
+  
+  <rect x="90" y="180" width="160" height="32" rx="6" fill="rgba(255, 255, 255, 0.1)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1" />
+  <text x="170" y="201" font-family="monospace" font-size="12" font-weight="bold" fill="#38bdf8" text-anchor="middle">API GATEWAY</text>
+  
+  <rect x="265" y="180" width="160" height="32" rx="6" fill="rgba(255, 255, 255, 0.1)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1" />
+  <text x="345" y="201" font-family="monospace" font-size="12" font-weight="bold" fill="#c084fc" text-anchor="middle">TRAFFIC ROUTING</text>
+  
+  <circle cx="600" cy="120" r="10" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="3" />
+               <circle cx="600" cy="180" r="10" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="3" />
+               <circle cx="660" cy="150" r="12" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="3" />
+               <line x1="610" y1="125" x2="650" y2="145" stroke="rgba(255, 255, 255, 0.4)" stroke-width="3" />
+               <line x1="610" y1="175" x2="650" y2="155" stroke="rgba(255, 255, 255, 0.4)" stroke-width="3" />
+</svg>
