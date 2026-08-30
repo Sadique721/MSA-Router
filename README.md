@@ -32,6 +32,22 @@
 </tr>
 </table>
 
+<!-- ========== NEW: SYSTEM DIAGRAM SECTION ========== -->
+## 📊 System Architecture & Workflow
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant R as MSA Router
+    participant S as Target Services
+    C->>R: Send Incoming Request
+    R->>R: Parse Header & Apply Middleware
+    R->>R: Resolve Route (Path Matching)
+    R->>S: Forward Request to Microservice
+    S->>R: Send Response
+    R->>C: Return Client Response
+```
+
 ---
 
 <!-- ========== 1. DYNAMIC HEADER BANNER (CAPSULE RENDER) ========== -->
