@@ -18,23 +18,65 @@ function Write-Log {
     Write-Host $line
 }
 
+function Test-ServiceHealth {
+    param([int]$Port, [string]$Name)
+    if ($Port -eq 11435) {
+        try {
+            $r = Invoke-RestMethod -Uri "http://127.0.0.1:11435/api/tags" -TimeoutSec 3 -ErrorAction Stop
+            if ($r.models) { return $true }
+        } catch { return $false }
+    }
+    if ($Port -eq 20128) {
+        try {
+            $r = Invoke-WebRequest -Uri "http://127.0.0.1:20128/v1/models" -TimeoutSec 3 -ErrorAction Stop
+            return $true
+        } catch {
+            if ($_.Exception.Response.StatusCode -eq 401) { return $true }
+            return $false
+        }
+    }
+    if ($Port -eq 20130) {
+        try {
+            $r = Invoke-RestMethod -Uri "http://127.0.0.1:20130/health" -TimeoutSec 3 -ErrorAction Stop
+            if ($r.service -eq "msa-ai-token-optimizer-engine") { return $true }
+        } catch { return $false }
+    }
+    return $false
+}
+
 function Ensure-ServiceOnPort {
     param([int]$Port, [string]$Name, [scriptblock]$StartAction)
     $conn = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' }
     if ($conn) {
-        Write-Log "✅ $Name already listening on port $Port."
-    } else {
+        $targetPid = $conn.OwningProcess[0]
+        $healthy = Test-ServiceHealth -Port $Port -Name $Name
+        if ($healthy) {
+            Write-Log "✅ $Name already listening on port $Port and healthy (PID: $targetPid)."
+        } else {
+            Write-Log "⚠️ Port $Port is occupied by an unhealthy or conflicting process (PID: $targetPid). Terminating it..."
+            Stop-Process -Id $targetPid -Force -ErrorAction SilentlyContinue
+            Start-Sleep 2
+            $conn = $null
+        }
+    }
+    
+    if (-not $conn) {
         Write-Log "⏳ Starting $Name on port $Port..."
         & $StartAction
         $retries = 15
+        $healthy = $false
         while ($retries -gt 0) {
             Start-Sleep 1
             $conn = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' }
-            if ($conn) { break }
+            if ($conn) {
+                $targetPid = $conn.OwningProcess[0]
+                $healthy = Test-ServiceHealth -Port $Port -Name $Name
+                if ($healthy) { break }
+            }
             $retries--
         }
-        if ($conn) { Write-Log "✅ $Name started successfully." }
-        else { Write-Log "⚠️ $Name startup timed out (will retry next cycle)." }
+        if ($conn -and $healthy) { Write-Log "✅ $Name started successfully on port $Port (PID: $targetPid)." }
+        else { Write-Log "⚠️ $Name startup timed out or unhealthy (will retry next cycle)." }
     }
 }
 

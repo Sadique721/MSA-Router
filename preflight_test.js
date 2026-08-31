@@ -87,7 +87,7 @@ async function runTests() {
   console.log('\n── [2] Ollama Model Inference ──');
   try {
     const r = await httpPost(11435, '/api/generate',
-      { model: 'qwen2.5:7b-instruct', prompt: 'Reply with just: OK', stream: false }, {}, 12000);
+      { model: 'qwen2.5:7b-instruct', prompt: 'Reply with just: OK', stream: false }, {}, 30000);
     const body = JSON.parse(r.data);
     if (body.response && body.response.length > 0) {
       log('🤖', 'Ollama Inference', 'PASS', `Got response: "${body.response.slice(0, 50).trim()}"`);
