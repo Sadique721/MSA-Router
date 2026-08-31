@@ -1,0 +1,220 @@
+{
+  "totalTests": 30,
+  "passed": 30,
+  "warned": 0,
+  "failed": 0,
+  "scorePercent": 100,
+  "timestamp": "2026-08-31T17:00:58.829Z",
+  "results": [
+    {
+      "category": "Unit",
+      "testName": "Ollama Port 11435 Listening",
+      "status": "PASS",
+      "details": "HTTP Status: 200",
+      "timestamp": "2026-08-31T17:00:18.600Z"
+    },
+    {
+      "category": "Unit",
+      "testName": "MSA Router Port 20130 Listening",
+      "status": "PASS",
+      "details": "HTTP Status: 200",
+      "timestamp": "2026-08-31T17:00:18.607Z"
+    },
+    {
+      "category": "Unit",
+      "testName": "OmniRoute Port 20128 Listening",
+      "status": "PASS",
+      "details": "HTTP Status: 401 (401 is expected for secured gateway)",
+      "timestamp": "2026-08-31T17:00:18.690Z"
+    },
+    {
+      "category": "Unit",
+      "testName": "Port 20131 Correctly Rejects REST (WebSocket Only)",
+      "status": "PASS",
+      "details": "HTTP Status: 426 (426 Upgrade Required confirm REST cannot use this port)",
+      "timestamp": "2026-08-31T17:00:18.696Z"
+    },
+    {
+      "category": "WhiteBox",
+      "testName": "IntelliJ config.yaml eliminates port 20131",
+      "status": "PASS",
+      "details": "Zero 20131 references",
+      "timestamp": "2026-08-31T17:00:18.699Z"
+    },
+    {
+      "category": "WhiteBox",
+      "testName": "IntelliJ config.yaml uses 127.0.0.1 (No localhost IPv6 bug)",
+      "status": "PASS",
+      "details": "100% 127.0.0.1 loopbacks",
+      "timestamp": "2026-08-31T17:00:18.699Z"
+    },
+    {
+      "category": "WhiteBox",
+      "testName": "VSCode config.json eliminates port 20131",
+      "status": "PASS",
+      "details": "Zero 20131 references",
+      "timestamp": "2026-08-31T17:00:18.699Z"
+    },
+    {
+      "category": "WhiteBox",
+      "testName": "VSCode config.json uses 127.0.0.1",
+      "status": "PASS",
+      "details": "100% 127.0.0.1 loopbacks",
+      "timestamp": "2026-08-31T17:00:18.699Z"
+    },
+    {
+      "category": "WhiteBox",
+      "testName": "Router local worker timeout extended to 180s",
+      "status": "PASS",
+      "details": "Timeout = 180000ms (prevents premature abort on heavy CPU prompts)",
+      "timestamp": "2026-08-31T17:00:18.701Z"
+    },
+    {
+      "category": "WhiteBox",
+      "testName": "Router Gemini-to-Local auto failover active",
+      "status": "PASS",
+      "details": "Automated fallback handler in place",
+      "timestamp": "2026-08-31T17:00:18.701Z"
+    },
+    {
+      "category": "GrayBox",
+      "testName": "OmniRoute DB storage file exists",
+      "status": "PASS",
+      "details": "Path: C:\\Users\\MD SADIQUE AMIN\\.omniroute\\storage.sqlite",
+      "timestamp": "2026-08-31T17:00:18.702Z"
+    },
+    {
+      "category": "GrayBox",
+      "testName": "Watchdog sets OLLAMA_NUM_PARALLEL=4",
+      "status": "PASS",
+      "details": "Concurrent slots: 4",
+      "timestamp": "2026-08-31T17:00:18.703Z"
+    },
+    {
+      "category": "GrayBox",
+      "testName": "Watchdog sets OLLAMA_MAX_LOADED_MODELS=4",
+      "status": "PASS",
+      "details": "Simultaneous resident models: 4",
+      "timestamp": "2026-08-31T17:00:18.703Z"
+    },
+    {
+      "category": "BlackBox",
+      "testName": "Public /v1/models returns OpenAI standard schema",
+      "status": "PASS",
+      "details": "Available Models: msa-ai, qwen2.5:7b-instruct, deepseek-r1:7b, qwen2.5:0.5b, gemini-3.6-flash, online-free-routing, nvidia/nemotron-3.5-lightning-30b-a3b",
+      "timestamp": "2026-08-31T17:00:18.706Z"
+    },
+    {
+      "category": "BlackBox",
+      "testName": "Public /v1/chat/completions returns 200 OK",
+      "status": "PASS",
+      "details": "HTTP Status: 200",
+      "timestamp": "2026-08-31T17:00:20.841Z"
+    },
+    {
+      "category": "Functional",
+      "testName": "Local Qwen 2.5 7B Direct Inference",
+      "status": "PASS",
+      "details": "Output: \"FUNCTIONAL_TEST_OK...\"",
+      "timestamp": "2026-08-31T17:00:22.198Z"
+    },
+    {
+      "category": "Functional",
+      "testName": "Fast Autocomplete Qwen 0.5B Inference",
+      "status": "PASS",
+      "details": "Output: \"As an AI language model, I don...\"",
+      "timestamp": "2026-08-31T17:00:26.636Z"
+    },
+    {
+      "category": "ReqResp",
+      "testName": "CORS preflight (OPTIONS) returns 200/204",
+      "status": "PASS",
+      "details": "Status: 204",
+      "timestamp": "2026-08-31T17:00:26.641Z"
+    },
+    {
+      "category": "ReqResp",
+      "testName": "Invalid model returns structured error code",
+      "status": "PASS",
+      "details": "Status: 503 (Handled gracefully)",
+      "timestamp": "2026-08-31T17:00:31.693Z"
+    },
+    {
+      "category": "Integration",
+      "testName": "Router -> DeepSeek R1 7B Local Pipeline",
+      "status": "PASS",
+      "details": "HTTP Status: 200",
+      "timestamp": "2026-08-31T17:00:41.137Z"
+    },
+    {
+      "category": "Load",
+      "testName": "8 Concurrent /v1/models Requests",
+      "status": "PASS",
+      "details": "8/8 succeeded in 18ms (Avg 2ms/req)",
+      "timestamp": "2026-08-31T17:00:41.155Z"
+    },
+    {
+      "category": "Stress",
+      "testName": "Empty Request Body Handling",
+      "status": "PASS",
+      "details": "Status: 400 (No process crash)",
+      "timestamp": "2026-08-31T17:00:41.159Z"
+    },
+    {
+      "category": "Stress",
+      "testName": "Large Code Prompt Handling",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-08-31T17:00:50.824Z"
+    },
+    {
+      "category": "Balance",
+      "testName": "Short task routed to Local zero-cost model",
+      "status": "PASS",
+      "details": "Target: local (0 Antigravity tokens consumed)",
+      "timestamp": "2026-08-31T17:00:50.853Z"
+    },
+    {
+      "category": "Balance",
+      "testName": "Medium task routed to Gemini free tier pool",
+      "status": "PASS",
+      "details": "Target: gemini",
+      "timestamp": "2026-08-31T17:00:50.854Z"
+    },
+    {
+      "category": "Balance",
+      "testName": "Heavy task routed to Nemotron high-capacity tier",
+      "status": "PASS",
+      "details": "Target: nemotron",
+      "timestamp": "2026-08-31T17:00:50.854Z"
+    },
+    {
+      "category": "NonFunctional",
+      "testName": "Startup Batch File Present in Windows Startup Directory",
+      "status": "PASS",
+      "details": "Path: C:\\Users\\MD SADIQUE AMIN\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Start-MSA-AI-Stack.bat",
+      "timestamp": "2026-08-31T17:00:50.854Z"
+    },
+    {
+      "category": "NonFunctional",
+      "testName": "Watchdog Health Loop Log Confirmed Active",
+      "status": "PASS",
+      "details": "Watchdog running in background",
+      "timestamp": "2026-08-31T17:00:50.855Z"
+    },
+    {
+      "category": "UAT",
+      "testName": "IntelliJ Code Query Scenario",
+      "status": "PASS",
+      "details": "Status: 200 (Fallback-safe & zero-token compliant)",
+      "timestamp": "2026-08-31T17:00:56.388Z"
+    },
+    {
+      "category": "UAT",
+      "testName": "Inline Tab Autocomplete Scenario",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-08-31T17:00:58.829Z"
+    }
+  ]
+}
