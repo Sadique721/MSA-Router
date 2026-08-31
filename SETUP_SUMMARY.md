@@ -33,3 +33,36 @@ Self-heals every 1 hour automatically
 
 ## Last Verified
 Preflight Test: 12/12 PASS, 0 FAIL
+## OmniRoute DB Issue — Rule & Fix Procedure
+
+### Trigger Symptoms:
+`
+[DB] Changing cache_size from 65536KB to 16384KB
+[DB] cache_size changed to 16384KB
+[DB] SQLite database ready: C:\Users\MD SADIQUE AMIN\.omniroute\storage.sqlite
+[MCP] OmniRoute MCP Server starting (stdio transport)...
+context canceled
+`
+
+### Root Cause:
+OmniRoute's SQLite database gets bloated over time causing memory pressure.
+cache_size forced down from 65536KB -> 16384KB = DB needs cleaning.
+DEP0190 (shell:true args) = non-critical Node.js deprecation, no action needed.
+
+### MANDATORY Fix Procedure (in this exact order):
+1. FIRST — Push ALL details to BOTH GitHub repos:
+   git push origin main
+   git push storage main
+
+2. ONLY AFTER push succeeds — delete/reset the SQLite DB:
+   Stop-Process -Name node -Force  (stop OmniRoute)
+   Remove-Item 'C:\Users\MD SADIQUE AMIN\.omniroute\storage.sqlite' -Force
+
+3. Restart OmniRoute — it auto-recreates a fresh DB:
+   node 'C:\Users\MD SADIQUE AMIN\AppData\Roaming\npm\node_modules\omniroute\bin\omniroute.mjs' serve --port 20128 --no-open
+
+### DB File Location:
+- SQLite: C:\Users\MD SADIQUE AMIN\.omniroute\storage.sqlite
+- Data Dir: C:\Users\MD SADIQUE AMIN\.omniroute
+
+### RULE: NEVER delete DB before GitHub push — data loss risk!
