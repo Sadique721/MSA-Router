@@ -362,8 +362,8 @@ if (isMainThread) {
           breakers[name].onFailure(error);
         }
 
-        // If local or online worker fails, fallback to Gemini
-        if ((name === 'online' || name === 'local') && !ctx.res.headersSent) {
+        // If local or online worker fails, fallback to Gemini (if we haven't failed over yet)
+        if ((name === 'online' || name === 'local') && !ctx.res.headersSent && !ctx.failover) {
           console.log(`[MSA Router] 🔄 ${name} worker failed/timed out. Performing self-healing failover to Gemini key-rotation worker...`);
           if (ctx.spans) {
             ctx.spans.T6_fallback_init = Date.now() - ctx.startTime;
@@ -372,6 +372,20 @@ if (isMainThread) {
           ctx.failover = true;
           // Send request to Gemini worker
           workers.gemini.postMessage({ type: 'request', reqId, payload: ctx.payload });
+          return;
+        }
+
+        // If gemini or nemotron worker fails (e.g. quota limit exceeded), fallback to local Ollama
+        if ((name === 'gemini' || name === 'nemotron') && !ctx.res.headersSent && !ctx.failover) {
+          console.log(`[MSA Router] 🔄 ${name} worker failed (quota/error). Performing self-healing failover to LOCAL Ollama worker (zero tokens)...`);
+          if (ctx.spans) {
+            ctx.spans.T6_fallback_init = Date.now() - ctx.startTime;
+          }
+          ctx.targetWorker = 'local';
+          ctx.payload.model = 'qwen2.5:7b-instruct'; // Failover to local instruct model
+          ctx.failover = true;
+          // Send request to Local worker
+          workers.local.postMessage({ type: 'request', reqId, payload: ctx.payload });
           return;
         }
 

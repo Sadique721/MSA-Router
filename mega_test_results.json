@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-31T15:57:39.435Z",
+  "timestamp": "2026-08-31T16:15:55.398Z",
   "score": 98,
   "pass": 53,
   "fail": 0,
@@ -177,13 +177,13 @@
       "category": "Load",
       "name": "10 concurrent /v1/models requests",
       "status": "PASS",
-      "detail": "10/10 succeeded in 13ms (avg 1ms/req)"
+      "detail": "10/10 succeeded in 11ms (avg 1ms/req)"
     },
     {
       "category": "Load",
       "name": "5 concurrent Ollama /api/tags requests",
       "status": "PASS",
-      "detail": "5/5 succeeded in 12ms"
+      "detail": "5/5 succeeded in 15ms"
     },
     {
       "category": "Stress",
@@ -327,7 +327,7 @@
       "category": "UAT",
       "name": "Scenario: Simple fix → local Ollama (zero tokens)",
       "status": "PASS",
-      "detail": "Status: 200 | Response: \"It seems like you are trying to print the string \"hello\", bu\""
+      "detail": "Status: 200 | Response: \"It looks like you're trying to print the string \"hello\", but\""
     }
   ]
 }
