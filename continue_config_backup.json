@@ -1,0 +1,140 @@
+{
+  "models": [
+    {
+      "title": "MSA AI Router (Local — Auto)",
+      "provider": "openai",
+      "model": "msa-ai",
+      "apiBase": "http://127.0.0.1:20130/v1",
+      "apiKey": "sk-msa-local",
+      "icon": "msa-ai.png",
+      "roles": [
+        "chat",
+        "edit",
+        "apply"
+      ]
+    },
+    {
+      "title": "MSA AI (Host Fallback)",
+      "provider": "openai",
+      "model": "msa-ai",
+      "apiBase": "http://127.0.0.1:20130/v1",
+      "apiKey": "sk-msa-local",
+      "icon": "msa-ai.png",
+      "roles": [
+        "chat",
+        "edit",
+        "apply"
+      ]
+    },
+    {
+      "title": "OmniRoute Gateway",
+      "provider": "openai",
+      "model": "msa-ai",
+      "apiBase": "http://127.0.0.1:20128/v1",
+      "apiKey": "sk-omniroute-local",
+      "icon": "msa-ai.png",
+      "roles": [
+        "chat"
+      ]
+    },
+    {
+      "title": "Qwen 2.5 7B (Local Ollama)",
+      "provider": "ollama",
+      "model": "qwen2.5:7b-instruct",
+      "apiBase": "http://127.0.0.1:11435",
+      "icon": "qwen.png"
+    },
+    {
+      "title": "DeepSeek R1 7B (Local Ollama)",
+      "provider": "ollama",
+      "model": "deepseek-r1:7b",
+      "apiBase": "http://127.0.0.1:11435",
+      "icon": "deepseek.png"
+    },
+    {
+      "title": "Gemini 3.6 Flash (OmniRoute - 4x Keys)",
+      "provider": "openai",
+      "model": "gemini-3.6-flash",
+      "apiBase": "http://127.0.0.1:20128/v1",
+      "apiKey": "sk-omniroute-local",
+      "icon": "gemini.png",
+      "roles": [
+        "chat",
+        "edit",
+        "apply"
+      ]
+    },
+    {
+      "title": "Gemini 2.5 Pro (OmniRoute - 4x Keys)",
+      "provider": "openai",
+      "model": "gemini-2.5-pro",
+      "apiBase": "http://127.0.0.1:20128/v1",
+      "apiKey": "sk-omniroute-local",
+      "icon": "gemini.png",
+      "roles": [
+        "chat",
+        "edit",
+        "apply"
+      ]
+    },
+    {
+      "title": "DeepSeek R1 (MSA Router)",
+      "provider": "openai",
+      "model": "deepseek-r1:7b",
+      "apiBase": "http://127.0.0.1:20130/v1",
+      "apiKey": "sk-msa-local",
+      "icon": "deepseek.png",
+      "roles": [
+        "chat",
+        "edit",
+        "apply"
+      ]
+    },
+    {
+      "title": "MSA AI - Gemini Pro (OmniRoute)",
+      "provider": "openai",
+      "model": "gemini-3.6-flash",
+      "apiBase": "http://127.0.0.1:20128/v1",
+      "apiKey": "sk-omniroute-local",
+      "icon": "msa-ai.png",
+      "roles": [
+        "chat",
+        "edit",
+        "apply"
+      ]
+    },
+    {
+      "title": "Gemini 3.6 Flash (MSA Router)",
+      "provider": "openai",
+      "model": "gemini-3.6-flash",
+      "apiBase": "http://127.0.0.1:20130/v1",
+      "apiKey": "sk-msa-local",
+      "icon": "gemini.png",
+      "roles": [
+        "chat",
+        "edit",
+        "apply"
+      ]
+    },
+    {
+      "title": "NVIDIA Nemotron 3.5 (MSA Router)",
+      "provider": "openai",
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "apiBase": "http://127.0.0.1:20130/v1",
+      "apiKey": "sk-msa-local",
+      "icon": "nvidia.png",
+      "roles": [
+        "chat",
+        "edit",
+        "apply"
+      ]
+    }
+  ],
+  "tabAutocompleteModel": {
+    "title": "MSA Autocomplete (Qwen 0.5B)",
+    "provider": "ollama",
+    "model": "qwen2.5:0.5b",
+    "apiBase": "http://127.0.0.1:11435",
+    "icon": "qwen.png"
+  }
+}
