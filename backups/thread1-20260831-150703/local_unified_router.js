@@ -130,12 +130,12 @@ if (isMainThread) {
       this.failureCount = 0;
       this.state = 'CLOSED';
     }
-    onFailure(error) {
+    onFailure() {
       this.failureCount++;
       if (this.failureCount >= this.failureThreshold) {
         this.state = 'OPEN';
         this.nextAttemptTime = Date.now() + this.cooldownPeriod;
-        console.warn(`[Circuit Breaker] 🚨 ${this.name} tripped! State = OPEN. Cooldown: ${this.cooldownPeriod}ms. Cause: ${error}`);
+        console.warn(`[Circuit Breaker] 🚨 ${this.name} tripped! State = OPEN. Cooldown: ${this.cooldownPeriod}ms`);
       }
     }
     canRequest() {
@@ -152,86 +152,12 @@ if (isMainThread) {
     }
   }
 
-  // Set of request IDs that have been aborted by the client
-  const abortedRequests = new Set();
-
-  function isLocalRequest(req) {
-    const ip = req.socket.remoteAddress;
-    return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
-  }
-
-  function isQualifyingFailure(error, status) {
-    if (!error) return false;
-    const errMsg = String(error).toLowerCase();
-    
-    // Status check
-    if (status) {
-      const s = parseInt(status, 10);
-      if (s === 402 || s === 429 || (s >= 500 && s <= 599)) {
-        return true;
-      }
-    }
-
-    // Error message keyword checks
-    if (
-      errMsg.includes('402') ||
-      errMsg.includes('429') ||
-      errMsg.includes('500') ||
-      errMsg.includes('502') ||
-      errMsg.includes('503') ||
-      errMsg.includes('504') ||
-      errMsg.includes('econnrefused') ||
-      errMsg.includes('timeout') ||
-      errMsg.includes('timed out') ||
-      errMsg.includes('connection refused') ||
-      errMsg.includes('network error') ||
-      errMsg.includes('fetch failed') ||
-      errMsg.includes('failed to fetch')
-    ) {
-      return true;
-    }
-
-    return false;
-  }
-
-  function sendError(ctx, reqId, status, errorMsg, workerName, extraBody = {}) {
-    if (!ctx || ctx.res.headersSent) return;
-    const duration = Date.now() - ctx.startTime;
-    
-    if (ctx.spans) {
-      ctx.spans.T5_provider_failed = duration;
-      ctx.spans.T9_complete = duration;
-      console.log(`[Observability] Request ${reqId} failed. Spans:`, JSON.stringify({
-        requestId: reqId,
-        spans: ctx.spans
-      }));
-    }
-
-    const responseBody = JSON.stringify({
-      error: {
-        message: errorMsg,
-        type: `${workerName || 'unknown'}_error`,
-        ...extraBody
-      }
-    });
-
-    ctx.res.writeHead(status || 502, {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(responseBody),
-      'x-msa-request-id': reqId,
-      'x-msa-worker': workerName || 'unknown',
-      'x-msa-timing': `${duration}ms`
-    });
-    ctx.res.end(responseBody);
-  }
-
   const geminiKeys = loadGeminiKeys();
 
   const breakers = {
     local: new CircuitBreaker('Local Ollama', { failureThreshold: 3, cooldownPeriod: 15000 }),
     online: new CircuitBreaker('Online Free (Pollinations)', { failureThreshold: 2, cooldownPeriod: 30000 }),
-    gemini: new CircuitBreaker('Gemini Cloud Pool', { failureThreshold: 3, cooldownPeriod: 20000 }),
-    nemotron: new CircuitBreaker('NVIDIA Nemotron NIM', { failureThreshold: 3, cooldownPeriod: 20000 })
+    gemini: new CircuitBreaker('Gemini Cloud Pool', { failureThreshold: 3, cooldownPeriod: 20000 })
   };
 
   // Active HTTP requests map (reqId -> res)
@@ -241,97 +167,51 @@ if (isMainThread) {
   const workers = {
     local: new Worker(__filename, { workerData: { type: 'local', port: 11435, omniPort: 20128 } }),
     online: new Worker(__filename, { workerData: { type: 'online' } }),
-    gemini: new Worker(__filename, { workerData: { type: 'gemini', keys: geminiKeys } }),
-    nemotron: new Worker(__filename, { workerData: { type: 'nemotron' } })
+    gemini: new Worker(__filename, { workerData: { type: 'gemini', keys: geminiKeys } })
   };
 
   // Setup worker message listeners
   Object.entries(workers).forEach(([name, worker]) => {
     worker.on('message', (msg) => {
       const { reqId, type, data, status, headers, error } = msg;
-      
-      // Explicit Client Abort Protection
-      if (abortedRequests.has(reqId)) {
-        return;
-      }
-
       const ctx = activeRequests.get(reqId);
       if (!ctx) return;
 
       if (type === 'headers') {
-        // Record connected span
-        if (!ctx.failover && ctx.spans) {
-          ctx.spans.T3_worker_connected = Date.now() - ctx.startTime;
-        } else if (ctx.failover && ctx.spans) {
-          ctx.spans.T7_fallback_connected = Date.now() - ctx.startTime;
-        }
-
-        const duration = Date.now() - ctx.startTime;
         const finalHeaders = {
           ...headers,
-          'x-msa-request-id': reqId,
-          'x-msa-worker': ctx.failover ? 'fallback' : ctx.targetWorker,
-          'x-msa-timing': `${duration}ms`
+          'x-msa-worker': ctx.failover ? 'fallback' : ctx.targetWorker
         };
         if (ctx.isStream) {
           ctx.res.writeHead(status, finalHeaders);
         }
       } else if (type === 'chunk') {
-        // Record first byte span
-        if (!ctx.failover && ctx.spans && ctx.spans.T4_first_byte === null) {
-          ctx.spans.T4_first_byte = Date.now() - ctx.startTime;
-        } else if (ctx.failover && ctx.spans && ctx.spans.T8_fallback_first_byte === null) {
-          ctx.spans.T8_fallback_first_byte = Date.now() - ctx.startTime;
-        }
-
         if (ctx.isStream) {
           ctx.res.write(data);
         } else {
-          // Parse chunk text content immediately (Fix 7)
-          const raw = String(data).trim();
-          if (raw.startsWith('data: ') && !raw.includes('[DONE]')) {
-            try {
-              const jsonStr = raw.substring(6).trim();
-              const parsed = JSON.parse(jsonStr);
-              if (parsed.choices && parsed.choices[0]) {
-                const delta = parsed.choices[0].delta;
-                if (delta && delta.content) {
-                  ctx.fullText = (ctx.fullText || '') + delta.content;
-                }
-              }
-            } catch (e) {
-              const parts = raw.split('\n');
-              for (const part of parts) {
-                const p = part.trim();
-                if (p.startsWith('data: ') && !p.includes('[DONE]')) {
-                  try {
-                    const parsed = JSON.parse(p.substring(6).trim());
-                    if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta?.content) {
-                      ctx.fullText = (ctx.fullText || '') + parsed.choices[0].delta.content;
-                    }
-                  } catch (err) {}
-                }
-              }
-            }
-          }
+          ctx.chunks.push(data);
         }
       } else if (type === 'end') {
-        // Record complete span
-        if (ctx.spans) {
-          ctx.spans.T9_complete = Date.now() - ctx.startTime;
-          console.log(`[Observability] Request ${reqId} completed. Spans:`, JSON.stringify({
-            requestId: reqId,
-            spans: ctx.spans
-          }));
-        }
-
         if (breakers[ctx.targetWorker]) {
           breakers[ctx.targetWorker].onSuccess();
         }
-
         if (ctx.isStream) {
           ctx.res.end();
         } else {
+          // Assemble non-streaming JSON response
+          let fullText = '';
+          const rawText = ctx.chunks.join('');
+          const lines = rawText.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ') && !line.includes('[DONE]')) {
+              try {
+                const parsed = JSON.parse(line.substring(6));
+                if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta) {
+                  fullText += parsed.choices[0].delta.content || '';
+                }
+              } catch (e) {}
+            }
+          }
           const responseBody = JSON.stringify({
             id: 'chatcmpl-' + Date.now(),
             object: 'chat.completion',
@@ -339,35 +219,25 @@ if (isMainThread) {
             model: ctx.payload.model || 'msa-ai',
             choices: [{
               index: 0,
-              message: { role: 'assistant', content: ctx.fullText || '' },
+              message: { role: 'assistant', content: fullText },
               finish_reason: 'stop'
             }]
           });
-          const duration = Date.now() - ctx.startTime;
           ctx.res.writeHead(200, {
             'Content-Type': 'application/json',
             'Content-Length': Buffer.byteLength(responseBody),
-            'x-msa-request-id': reqId,
-            'x-msa-worker': ctx.failover ? 'fallback' : ctx.targetWorker,
-            'x-msa-timing': `${duration}ms`
+            'x-msa-worker': ctx.failover ? 'fallback' : ctx.targetWorker
           });
           ctx.res.end(responseBody);
         }
         activeRequests.delete(reqId);
       } else if (type === 'error') {
         console.error(`[MSA Router] ❌ Worker error for req ${reqId} from ${name}:`, error);
-        
-        const isQualifying = isQualifyingFailure(error, status);
-        if (isQualifying && breakers[name]) {
+        if (breakers[name]) {
           breakers[name].onFailure(error);
         }
-
-        // If local or online worker fails, fallback to Gemini
         if ((name === 'online' || name === 'local') && !ctx.res.headersSent) {
           console.log(`[MSA Router] 🔄 ${name} worker failed/timed out. Performing self-healing failover to Gemini key-rotation worker...`);
-          if (ctx.spans) {
-            ctx.spans.T6_fallback_init = Date.now() - ctx.startTime;
-          }
           ctx.targetWorker = 'gemini';
           ctx.failover = true;
           // Send request to Gemini worker
@@ -375,18 +245,12 @@ if (isMainThread) {
           return;
         }
 
-        // Handle error output
-        const s = status || 502;
-        if ((s === 429 || String(error).includes('quota_exhausted') || String(error).includes('cooldown')) && !ctx.res.headersSent) {
-          const retrySec = msg.retryAfter || 30;
-          sendError(ctx, reqId, 503, error, name, { retry_after: retrySec });
+        if (!ctx.res.headersSent) {
+          ctx.res.writeHead(status || 502, { 'Content-Type': 'application/json' });
+          ctx.res.end(JSON.stringify({ error: { message: error, type: `${name}_worker_error` } }));
         } else {
-          if (!ctx.res.headersSent) {
-            sendError(ctx, reqId, s, error, name);
-          } else {
-            ctx.res.write(`data: ${JSON.stringify({ error: { message: error } })}\n\n`);
-            ctx.res.end();
-          }
+          ctx.res.write(`data: ${JSON.stringify({ error: { message: error } })}\n\n`);
+          ctx.res.end();
         }
         activeRequests.delete(reqId);
       }
@@ -455,7 +319,7 @@ if (isMainThread) {
 
   console.log(`[MSA Token Guard] ═════════════════════════════════════════════`);
   console.log(`[MSA Token Guard] 🛡️ Smart Token Optimizer Engine v5.0 Active`);
-  console.log(`[MSA Token Guard] Multi-Threaded Workers  : ${Object.keys(workers).length} Threads Active`);
+  console.log(`[MSA Token Guard] Multi-Threaded Workers  : 3 Threads Active`);
   console.log(`[MSA Token Guard] Caching & Pruning       : ENABLED`);
   console.log(`[MSA Token Guard] Listening on            : http://localhost:${PORT}`);
   console.log(`[MSA Token Guard] ═════════════════════════════════════════════`);
@@ -474,62 +338,30 @@ if (isMainThread) {
     // GET /health
     if (req.method === 'GET' && req.url === '/health') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      if (!isLocalRequest(req)) {
-        res.end(JSON.stringify({
-          status: 'ok',
-          service: 'msa-ai-token-optimizer-engine',
-          version: '5.0'
-        }));
-      } else {
-        res.end(JSON.stringify({
-          status: 'ok',
-          service: 'msa-ai-token-optimizer-engine',
-          version: '5.0',
-          tokenGuard: 'ACTIVE',
-          threads: Object.keys(workers).length,
-          cores: CPU_CORES,
-          port: PORT,
-          breakers: Object.entries(breakers).reduce((acc, [k, v]) => {
-            acc[k] = {
-              state: v.state
-            };
-            return acc;
-          }, {})
-        }));
-      }
-      return;
-    }
-
-    // GET /v1/token-stats (Local Only Security)
-    if (req.method === 'GET' && req.url === '/v1/token-stats') {
-      if (!isLocalRequest(req)) {
-        res.writeHead(403, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Forbidden' }));
-        return;
-      }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(stats, null, 2));
-      return;
-    }
-
-    // GET /v1/request-stats (Local Only Security)
-    if (req.method === 'GET' && req.url === '/v1/request-stats') {
-      if (!isLocalRequest(req)) {
-        res.writeHead(403, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Forbidden' }));
-        return;
-      }
-      const aggregatedStats = {
-        totalRequests: stats.totalRequests,
-        cacheHits: stats.cacheHits,
-        uptimeSeconds: Math.floor(process.uptime()),
+      res.end(JSON.stringify({
+        status: 'ok',
+        service: 'msa-ai-token-optimizer-engine',
+        version: '5.0',
+        tokenGuard: 'ACTIVE',
+        threads: 3,
+        cores: CPU_CORES,
+        port: PORT,
         breakers: Object.entries(breakers).reduce((acc, [k, v]) => {
-          acc[k] = v.state;
+          acc[k] = {
+            state: v.state,
+            failureCount: v.failureCount,
+            nextAttemptTime: v.nextAttemptTime
+          };
           return acc;
         }, {})
-      };
+      }));
+      return;
+    }
+
+    // GET /v1/token-stats
+    if (req.method === 'GET' && req.url === '/v1/token-stats') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(aggregatedStats, null, 2));
+      res.end(JSON.stringify(stats, null, 2));
       return;
     }
 
@@ -544,9 +376,8 @@ if (isMainThread) {
           { id: 'qwen2.5:7b-instruct', object: 'model', created: now, owned_by: 'msa-unified' },
           { id: 'deepseek-r1:7b', object: 'model', created: now, owned_by: 'msa-unified' },
           { id: 'qwen2.5:0.5b', object: 'model', created: now, owned_by: 'msa-unified' },
-          { id: 'gemini-3.6-flash', object: 'model', created: now, owned_by: 'google' },
-          { id: 'online-free-routing', object: 'model', created: now, owned_by: 'online-free' },
-          { id: 'nvidia/nemotron-3.5-lightning-30b-a3b', object: 'model', created: now, owned_by: 'nvidia' }
+          { id: 'gemini-3.1-flash-lite', object: 'model', created: now, owned_by: 'google' },
+          { id: 'online-free-routing', object: 'model', created: now, owned_by: 'online-free' }
         ]
       }));
       return;
@@ -581,40 +412,11 @@ if (isMainThread) {
           const reqId = crypto.randomUUID();
           const isStream = payload.stream !== false;
           payload.stream = true; // Force streaming for uniform worker processing
-
-          const startTime = Date.now();
-          const spans = {
-            T0_received: 0,
-            T1_routed: null,
-            T2_worker_posted: null,
-            T3_worker_connected: null,
-            T4_first_byte: null,
-            T5_provider_failed: null,
-            T6_fallback_init: null,
-            T7_fallback_connected: null,
-            T8_fallback_first_byte: null,
-            T9_complete: null
-          };
-
-          activeRequests.set(reqId, {
-            req,
-            res,
-            payload,
-            isStream,
-            chunks: [],
-            startTime,
-            spans,
-            targetWorker: 'local',
-            failover: false,
-            fullText: ''
-          });
+          activeRequests.set(reqId, { req, res, payload, isStream, chunks: [] });
 
           res.on('close', () => {
             if (!res.writableEnded && activeRequests.has(reqId)) {
               console.log(`[MSA Router] Client connection closed early (${reqId}). Aborting workers.`);
-              abortedRequests.add(reqId);
-              setTimeout(() => abortedRequests.delete(reqId), 10000);
-
               Object.values(workers).forEach(w => w.postMessage({ type: 'abort', reqId }));
               activeRequests.delete(reqId);
             }
@@ -622,9 +424,7 @@ if (isMainThread) {
 
           // Determine Worker Target
           let targetWorker = 'local';
-          if (reqModel.includes('nemotron') || reqModel.includes('agentic')) {
-            targetWorker = 'nemotron';
-          } else if (reqModel.includes('gemini') || reqModel.includes('cloud') || reqModel.includes('google')) {
+          if (reqModel.includes('gemini') || reqModel.includes('cloud') || reqModel.includes('google')) {
             targetWorker = 'gemini';
           } else if (reqModel.includes('free') || reqModel.includes('online') || reqModel.includes('pollinations')) {
             targetWorker = 'online';
@@ -640,8 +440,6 @@ if (isMainThread) {
             }
           }
 
-          spans.T1_routed = Date.now() - startTime;
-
           // Circuit Breaker health check & early failover
           if (breakers[targetWorker] && !breakers[targetWorker].canRequest()) {
             if (targetWorker === 'online') {
@@ -650,21 +448,16 @@ if (isMainThread) {
             }
           }
 
-          const ctx = activeRequests.get(reqId);
-
           // If the selected worker circuit is OPEN and no fallback is possible, reject request
           if (breakers[targetWorker] && !breakers[targetWorker].canRequest()) {
             console.warn(`[Circuit Breaker] 🚨 Denying request ${reqId} because target worker ${targetWorker} circuit is OPEN.`);
-            if (ctx) {
-              sendError(ctx, reqId, 503, `Service temporarily unavailable. Circuit breaker is OPEN for ${targetWorker} provider.`, targetWorker);
-            } else {
-              res.writeHead(503, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: { message: `Service temporarily unavailable. Circuit breaker is OPEN for ${targetWorker} provider.`, type: 'circuit_open_error' } }));
-            }
+            res.writeHead(503, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: { message: `Service temporarily unavailable. Circuit breaker is OPEN for ${targetWorker} provider.`, type: 'circuit_open_error' } }));
             return;
           }
 
           // Store targetWorker in activeRequests context
+          const ctx = activeRequests.get(reqId);
           if (ctx) {
             ctx.targetWorker = targetWorker;
           }
@@ -672,8 +465,6 @@ if (isMainThread) {
           if (targetWorker === 'gemini') {
             stats.cloudTokensStreamed += 250;
             console.log(`[MSA Router] ➡️ Delegating to Gemini Worker (Rotating Keys)`);
-          } else if (targetWorker === 'nemotron') {
-            console.log(`[MSA Router] ➡️ Delegating to NVIDIA Nemotron Cloud Worker`);
           } else if (targetWorker === 'online') {
             console.log(`[MSA Router] ➡️ Delegating to Online Free Open-Source Worker`);
           } else {
@@ -681,9 +472,6 @@ if (isMainThread) {
             console.log(`[MSA Router] ➡️ Delegating to Local Ollama Worker`);
           }
 
-          if (ctx && ctx.spans) {
-            ctx.spans.T2_worker_posted = Date.now() - startTime;
-          }
           workers[targetWorker].postMessage({ type: 'request', reqId, payload });
 
         } catch (err) {
@@ -728,14 +516,14 @@ else {
 
       try {
         if (workerData.type === 'local') {
-          // 5-second timeout for local Ollama to ensure fallback is fast (Fix 6)
-          const localTimeoutSignal = AbortSignal.timeout(5000);
+          // 8-second timeout for local Ollama
+          const localTimeoutSignal = AbortSignal.timeout(8000);
           const combinedSignal = AbortSignal.any([abortCtrl.signal, localTimeoutSignal]);
           try {
             await handleLocalRequest(reqId, payload, combinedSignal);
           } catch (err) {
             if (localTimeoutSignal.aborted) {
-              throw new Error('Local Ollama request timed out after 5s');
+              throw new Error('Local Ollama request timed out after 8s');
             }
             throw err;
           }
@@ -743,8 +531,6 @@ else {
           await handleOnlineRequest(reqId, payload, abortCtrl.signal);
         } else if (workerData.type === 'gemini') {
           await handleGeminiRequest(reqId, payload, abortCtrl.signal);
-        } else if (workerData.type === 'nemotron') {
-          await handleNemotronRequest(reqId, payload, abortCtrl.signal);
         }
       } catch (err) {
         if (err.name !== 'AbortError' && !abortCtrl.signal.aborted) {
@@ -901,7 +687,6 @@ else {
 
   // ─── Worker 3: Google Gemini Load Balancer & Rotator ───────────────────────
   let currentKeyIndex = 0;
-  let keyCooldowns = [];
 
   async function handleGeminiRequest(reqId, payload, signal) {
     const keys = workerData.keys;
@@ -909,38 +694,7 @@ else {
       throw new Error("No Gemini API keys loaded.");
     }
 
-    // Initialize keyCooldowns if not done yet
-    if (keyCooldowns.length === 0) {
-      keyCooldowns = new Array(keys.length).fill(0);
-    }
-
-    const now = Date.now();
-    let selectedIdx = -1;
-
-    // Find the first key that is not in cooldown
-    for (let i = 0; i < keys.length; i++) {
-      const idx = (currentKeyIndex + i) % keys.length;
-      if (now >= keyCooldowns[idx]) {
-        selectedIdx = idx;
-        break;
-      }
-    }
-
-    if (selectedIdx === -1) {
-      // Find minimum remaining cooldown time to suggest in Retry-After
-      const minCooldown = Math.min(...keyCooldowns);
-      const retryAfter = Math.max(1, Math.ceil((minCooldown - now) / 1000));
-      parentPort.postMessage({
-        reqId,
-        type: 'error',
-        error: `All Gemini API keys are in cooldown. Quota exhausted.`,
-        status: 429,
-        retryAfter
-      });
-      return;
-    }
-
-    const model = 'gemini-3.6-flash';
+    const model = 'gemini-3.1-flash-lite';
     const contents = (payload.messages || []).map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content) }]
@@ -950,77 +704,44 @@ else {
     let attempts = 0;
     let response = null;
     let lastError = null;
-    let lastStatus = null;
 
-    // Retry loop starting from the selected non-cooling key
-    let testIdx = selectedIdx;
+    // Retry loop rotating keys on failure
     while (attempts < keys.length) {
-      // Skip keys in cooldown during rotation attempts
-      if (Date.now() < keyCooldowns[testIdx]) {
-        testIdx = (testIdx + 1) % keys.length;
-        attempts++;
-        continue;
-      }
-
-      const apiKey = keys[testIdx];
+      const apiKey = keys[currentKeyIndex];
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
-
-      // 10-second timeout per key fetch to keep fallback responsive
-      const keyTimeoutCtrl = new AbortController();
-      const keyTimeout = setTimeout(() => keyTimeoutCtrl.abort(), 10000);
-      const combinedSignal = AbortSignal.any([signal, keyTimeoutCtrl.signal]);
 
       try {
         response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: geminiPayload,
-          signal: combinedSignal
+          signal
         });
-        clearTimeout(keyTimeout);
 
         if (response.ok) {
-          // Key was successful, advance index
-          currentKeyIndex = (testIdx + 1) % keys.length;
+          // Increment index for next request distribution
+          currentKeyIndex = (currentKeyIndex + 1) % keys.length;
           break;
         } else {
           const errText = await response.text();
-          lastError = `Key #${testIdx} returned status ${response.status}: ${errText}`;
-          lastStatus = response.status;
-          console.warn(`[Gemini Worker] Key #${testIdx} failed:`, lastError);
-
-          // Place failing key on a 60-second cooldown (Fix 5)
-          if (response.status === 429 || response.status === 402) {
-            console.warn(`[Gemini Worker] Key #${testIdx} rate-limited. Setting 60s cooldown.`);
-            keyCooldowns[testIdx] = Date.now() + 60000;
-          }
+          lastError = `Key #${currentKeyIndex} returned status ${response.status}: ${errText}`;
+          console.warn(`[Gemini Worker] Key #${currentKeyIndex} failed:`, lastError);
         }
       } catch (err) {
-        clearTimeout(keyTimeout);
         lastError = err.message;
-        lastStatus = err.name === 'AbortError' && keyTimeoutCtrl.signal.aborted ? 408 : 502;
-        console.warn(`[Gemini Worker] Key #${testIdx} error:`, lastError);
-        if (err.name === 'AbortError' && !keyTimeoutCtrl.signal.aborted) {
-          // Genuine client abort, exit retry loop
+        console.warn(`[Gemini Worker] Key #${currentKeyIndex} network error:`, lastError);
+        if (err.name === 'AbortError' || signal.aborted) {
           break;
         }
-        // Network errors or timeout: place key on temporary 10s cooldown to rotate away from it
-        keyCooldowns[testIdx] = Date.now() + 10000;
       }
 
-      // Rotate to next key
-      testIdx = (testIdx + 1) % keys.length;
+      // Failover to next key
+      currentKeyIndex = (currentKeyIndex + 1) % keys.length;
       attempts++;
     }
 
     if (!response || !response.ok) {
-      parentPort.postMessage({
-        reqId,
-        type: 'error',
-        error: `All ${keys.length} Gemini keys failed. Last error: ${lastError}`,
-        status: lastStatus || 502
-      });
-      return;
+      throw new Error(`All ${keys.length} Gemini API keys failed. Last error: ${lastError}`);
     }
 
     parentPort.postMessage({
@@ -1070,80 +791,5 @@ else {
 
     parentPort.postMessage({ reqId, type: 'chunk', data: 'data: [DONE]\n\n' });
     parentPort.postMessage({ reqId, type: 'end' });
-  }
-
-  // ─── Worker 4: NVIDIA Nemotron NIM Cloud Worker ────────────────────────────
-  async function handleNemotronRequest(reqId, payload, signal) {
-    const apiKey = process.env.NVIDIA_API_KEY;
-    if (!apiKey) {
-      parentPort.postMessage({
-        reqId,
-        type: 'error',
-        error: 'NVIDIA_API_KEY environment variable is not set.',
-        status: 400
-      });
-      return;
-    }
-
-    const model = 'nvidia/nemotron-3.5-lightning-30b-a3b';
-    const outboundPayload = {
-      model,
-      messages: payload.messages,
-      temperature: payload.temperature ?? 0.5,
-      top_p: payload.top_p ?? 0.9,
-      max_tokens: payload.max_tokens ?? 1024,
-      stream: true
-    };
-
-    try {
-      const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(outboundPayload),
-        signal
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`NVIDIA NIM returned status ${response.status}: ${errText}`);
-      }
-
-      parentPort.postMessage({
-        reqId,
-        type: 'headers',
-        status: 200,
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive'
-        }
-      });
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const text = decoder.decode(value, { stream: true });
-        parentPort.postMessage({ reqId, type: 'chunk', data: text });
-      }
-
-      parentPort.postMessage({ reqId, type: 'chunk', data: 'data: [DONE]\n\n' });
-      parentPort.postMessage({ reqId, type: 'end' });
-
-    } catch (err) {
-      if (err.name !== 'AbortError' && !signal.aborted) {
-        parentPort.postMessage({
-          reqId,
-          type: 'error',
-          error: err.message,
-          status: 502
-        });
-      }
-    }
   }
 }

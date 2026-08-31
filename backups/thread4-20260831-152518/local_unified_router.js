@@ -230,8 +230,7 @@ if (isMainThread) {
   const breakers = {
     local: new CircuitBreaker('Local Ollama', { failureThreshold: 3, cooldownPeriod: 15000 }),
     online: new CircuitBreaker('Online Free (Pollinations)', { failureThreshold: 2, cooldownPeriod: 30000 }),
-    gemini: new CircuitBreaker('Gemini Cloud Pool', { failureThreshold: 3, cooldownPeriod: 20000 }),
-    nemotron: new CircuitBreaker('NVIDIA Nemotron NIM', { failureThreshold: 3, cooldownPeriod: 20000 })
+    gemini: new CircuitBreaker('Gemini Cloud Pool', { failureThreshold: 3, cooldownPeriod: 20000 })
   };
 
   // Active HTTP requests map (reqId -> res)
@@ -241,8 +240,7 @@ if (isMainThread) {
   const workers = {
     local: new Worker(__filename, { workerData: { type: 'local', port: 11435, omniPort: 20128 } }),
     online: new Worker(__filename, { workerData: { type: 'online' } }),
-    gemini: new Worker(__filename, { workerData: { type: 'gemini', keys: geminiKeys } }),
-    nemotron: new Worker(__filename, { workerData: { type: 'nemotron' } })
+    gemini: new Worker(__filename, { workerData: { type: 'gemini', keys: geminiKeys } })
   };
 
   // Setup worker message listeners
@@ -455,7 +453,7 @@ if (isMainThread) {
 
   console.log(`[MSA Token Guard] ═════════════════════════════════════════════`);
   console.log(`[MSA Token Guard] 🛡️ Smart Token Optimizer Engine v5.0 Active`);
-  console.log(`[MSA Token Guard] Multi-Threaded Workers  : ${Object.keys(workers).length} Threads Active`);
+  console.log(`[MSA Token Guard] Multi-Threaded Workers  : 3 Threads Active`);
   console.log(`[MSA Token Guard] Caching & Pruning       : ENABLED`);
   console.log(`[MSA Token Guard] Listening on            : http://localhost:${PORT}`);
   console.log(`[MSA Token Guard] ═════════════════════════════════════════════`);
@@ -486,7 +484,7 @@ if (isMainThread) {
           service: 'msa-ai-token-optimizer-engine',
           version: '5.0',
           tokenGuard: 'ACTIVE',
-          threads: Object.keys(workers).length,
+          threads: 3,
           cores: CPU_CORES,
           port: PORT,
           breakers: Object.entries(breakers).reduce((acc, [k, v]) => {
@@ -544,9 +542,8 @@ if (isMainThread) {
           { id: 'qwen2.5:7b-instruct', object: 'model', created: now, owned_by: 'msa-unified' },
           { id: 'deepseek-r1:7b', object: 'model', created: now, owned_by: 'msa-unified' },
           { id: 'qwen2.5:0.5b', object: 'model', created: now, owned_by: 'msa-unified' },
-          { id: 'gemini-3.6-flash', object: 'model', created: now, owned_by: 'google' },
-          { id: 'online-free-routing', object: 'model', created: now, owned_by: 'online-free' },
-          { id: 'nvidia/nemotron-3.5-lightning-30b-a3b', object: 'model', created: now, owned_by: 'nvidia' }
+          { id: 'gemini-3.1-flash-lite', object: 'model', created: now, owned_by: 'google' },
+          { id: 'online-free-routing', object: 'model', created: now, owned_by: 'online-free' }
         ]
       }));
       return;
@@ -622,9 +619,7 @@ if (isMainThread) {
 
           // Determine Worker Target
           let targetWorker = 'local';
-          if (reqModel.includes('nemotron') || reqModel.includes('agentic')) {
-            targetWorker = 'nemotron';
-          } else if (reqModel.includes('gemini') || reqModel.includes('cloud') || reqModel.includes('google')) {
+          if (reqModel.includes('gemini') || reqModel.includes('cloud') || reqModel.includes('google')) {
             targetWorker = 'gemini';
           } else if (reqModel.includes('free') || reqModel.includes('online') || reqModel.includes('pollinations')) {
             targetWorker = 'online';
@@ -672,8 +667,6 @@ if (isMainThread) {
           if (targetWorker === 'gemini') {
             stats.cloudTokensStreamed += 250;
             console.log(`[MSA Router] ➡️ Delegating to Gemini Worker (Rotating Keys)`);
-          } else if (targetWorker === 'nemotron') {
-            console.log(`[MSA Router] ➡️ Delegating to NVIDIA Nemotron Cloud Worker`);
           } else if (targetWorker === 'online') {
             console.log(`[MSA Router] ➡️ Delegating to Online Free Open-Source Worker`);
           } else {
@@ -743,8 +736,6 @@ else {
           await handleOnlineRequest(reqId, payload, abortCtrl.signal);
         } else if (workerData.type === 'gemini') {
           await handleGeminiRequest(reqId, payload, abortCtrl.signal);
-        } else if (workerData.type === 'nemotron') {
-          await handleNemotronRequest(reqId, payload, abortCtrl.signal);
         }
       } catch (err) {
         if (err.name !== 'AbortError' && !abortCtrl.signal.aborted) {
@@ -940,7 +931,7 @@ else {
       return;
     }
 
-    const model = 'gemini-3.6-flash';
+    const model = 'gemini-3.1-flash-lite';
     const contents = (payload.messages || []).map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content) }]
@@ -965,9 +956,9 @@ else {
       const apiKey = keys[testIdx];
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
 
-      // 10-second timeout per key fetch to keep fallback responsive
+      // 4-second timeout per key fetch to keep fallback responsive (Fix 6)
       const keyTimeoutCtrl = new AbortController();
-      const keyTimeout = setTimeout(() => keyTimeoutCtrl.abort(), 10000);
+      const keyTimeout = setTimeout(() => keyTimeoutCtrl.abort(), 4000);
       const combinedSignal = AbortSignal.any([signal, keyTimeoutCtrl.signal]);
 
       try {
@@ -1070,80 +1061,5 @@ else {
 
     parentPort.postMessage({ reqId, type: 'chunk', data: 'data: [DONE]\n\n' });
     parentPort.postMessage({ reqId, type: 'end' });
-  }
-
-  // ─── Worker 4: NVIDIA Nemotron NIM Cloud Worker ────────────────────────────
-  async function handleNemotronRequest(reqId, payload, signal) {
-    const apiKey = process.env.NVIDIA_API_KEY;
-    if (!apiKey) {
-      parentPort.postMessage({
-        reqId,
-        type: 'error',
-        error: 'NVIDIA_API_KEY environment variable is not set.',
-        status: 400
-      });
-      return;
-    }
-
-    const model = 'nvidia/nemotron-3.5-lightning-30b-a3b';
-    const outboundPayload = {
-      model,
-      messages: payload.messages,
-      temperature: payload.temperature ?? 0.5,
-      top_p: payload.top_p ?? 0.9,
-      max_tokens: payload.max_tokens ?? 1024,
-      stream: true
-    };
-
-    try {
-      const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(outboundPayload),
-        signal
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`NVIDIA NIM returned status ${response.status}: ${errText}`);
-      }
-
-      parentPort.postMessage({
-        reqId,
-        type: 'headers',
-        status: 200,
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive'
-        }
-      });
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const text = decoder.decode(value, { stream: true });
-        parentPort.postMessage({ reqId, type: 'chunk', data: text });
-      }
-
-      parentPort.postMessage({ reqId, type: 'chunk', data: 'data: [DONE]\n\n' });
-      parentPort.postMessage({ reqId, type: 'end' });
-
-    } catch (err) {
-      if (err.name !== 'AbortError' && !signal.aborted) {
-        parentPort.postMessage({
-          reqId,
-          type: 'error',
-          error: err.message,
-          status: 502
-        });
-      }
-    }
   }
 }

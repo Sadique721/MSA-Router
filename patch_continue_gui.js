@@ -1,5 +1,5 @@
 const fs = require('fs');
-const path = 'C:\\Users\\MD SADIQUE AMIN\\.antigravity-ide\\extensions\\continue.continue-2.0.0-win32-x64\\gui\\assets\\index.js';
+const path = 'C:\\Users\\MD SADIQUE AMIN\\.vscode\\extensions\\continue.continue-2.0.0-win32-x64\\gui\\assets\\index.js';
 const bak = path + '.original';
 
 if (!fs.existsSync(bak)) {

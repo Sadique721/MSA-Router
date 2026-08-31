@@ -3,17 +3,32 @@ continue-plugin.zip
 *.zip
 *.tar.gz
 
-# Runtime & DB Data
+# Runtime & DB Data (never commit)
 omniroute-data/
 *.sqlite
 *.sqlite3
 *.db
+watchdog.log
 *.log
 
-# Environment & Temp
+# API Keys & Secrets (NEVER commit)
 .env
 .env.*
+*api_key*
+*secret*
+*credentials*
+
+# Node
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Test Output & Stress Results
+stress-results/
+secrets/
+credentials/
+
+# OS
+Thumbs.db
+.DS_Store
