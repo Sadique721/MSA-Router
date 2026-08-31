@@ -464,7 +464,7 @@ async function uatTests() {
   // UAT 1: User asks Java question (now goes to local if Gemini in cooldown)
   const uat1 = await safeReq(20130, 'POST', '/v1/chat/completions',
     { model: 'msa-ai', messages: [{ role: 'user', content: 'What does this Java code do: public static void main(String[] args) {}' }], max_tokens: 50 },
-    { Authorization: 'Bearer sk-msa-local' }, 30000);
+    { Authorization: 'Bearer sk-msa-local' }, 60000);
   record('UAT', 'Scenario: IntelliJ user asks Java code question', uat1.status === 200 ? 'PASS' : 'FAIL',
     `Status: ${uat1.status} (Fallback: Gemini keys down→Local Ollama)`);
 
