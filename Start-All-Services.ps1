@@ -139,6 +139,8 @@ Fix-McpConfig
 # 1. Start Ollama (port 11435)
 Ensure-ServiceOnPort -Port 11435 -Name "Ollama" -StartAction {
     [System.Environment]::SetEnvironmentVariable("OLLAMA_HOST", "127.0.0.1:11435", "Process")
+    [System.Environment]::SetEnvironmentVariable("OLLAMA_NUM_PARALLEL", "4", "Process")
+    [System.Environment]::SetEnvironmentVariable("OLLAMA_MAX_LOADED_MODELS", "4", "Process")
     if (Test-Path $OllamaAppPath) {
         Start-Process $OllamaAppPath -WindowStyle Hidden
     } else {
@@ -153,7 +155,7 @@ Ensure-ServiceOnPort -Port 20128 -Name "OmniRoute" -StartAction {
 
 # 3. Start MSA Router (port 20130)
 Ensure-ServiceOnPort -Port 20130 -Name "MSA Router" -StartAction {
-    Start-Process "node" -ArgumentList "`"$RouterScript`"" -WindowStyle Hidden
+    Start-Process "node" -ArgumentList "`"$RouterScript`"" -RedirectStandardOutput "router.log" -RedirectStandardError "router_error.log" -WindowStyle Hidden
 }
 
 # 4. Ensure VS Code Continue extension
@@ -176,6 +178,8 @@ while ($true) {
     # Self-heal all services
     Ensure-ServiceOnPort -Port 11435 -Name "Ollama" -StartAction {
         [System.Environment]::SetEnvironmentVariable("OLLAMA_HOST", "127.0.0.1:11435", "Process")
+        [System.Environment]::SetEnvironmentVariable("OLLAMA_NUM_PARALLEL", "4", "Process")
+        [System.Environment]::SetEnvironmentVariable("OLLAMA_MAX_LOADED_MODELS", "4", "Process")
         if (Test-Path $OllamaAppPath) {
             Start-Process $OllamaAppPath -WindowStyle Hidden
         } else {
@@ -188,7 +192,7 @@ while ($true) {
     }
 
     Ensure-ServiceOnPort -Port 20130 -Name "MSA Router" -StartAction {
-        Start-Process "node" -ArgumentList "`"$RouterScript`"" -WindowStyle Hidden
+        Start-Process "node" -ArgumentList "`"$RouterScript`"" -RedirectStandardOutput "router.log" -RedirectStandardError "router_error.log" -WindowStyle Hidden
     }
 
     # Fix BOM drift (if system updates reset config)

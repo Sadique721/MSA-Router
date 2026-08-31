@@ -752,14 +752,14 @@ else {
 
       try {
         if (workerData.type === 'local') {
-          // 30-second timeout for local Ollama to ensure cold-starts are supported
-          const localTimeoutSignal = AbortSignal.timeout(30000);
+          // 180-second timeout for local Ollama to support large context processing
+          const localTimeoutSignal = AbortSignal.timeout(180000);
           const combinedSignal = AbortSignal.any([abortCtrl.signal, localTimeoutSignal]);
           try {
             await handleLocalRequest(reqId, payload, combinedSignal);
           } catch (err) {
             if (localTimeoutSignal.aborted) {
-              throw new Error('Local Ollama request timed out after 30s');
+              throw new Error('Local Ollama request timed out after 180s');
             }
             throw err;
           }
