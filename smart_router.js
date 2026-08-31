@@ -26,26 +26,27 @@ const MODELS = {
   nemotron: 'nvidia/nemotron-3.5-lightning-30b-a3b',
 };
 
-// Task complexity classifier
+// Task complexity classifier — keywords WIN over length
 function classifyTask(prompt) {
   const lower = prompt.toLowerCase();
   const len = prompt.length;
 
-  // Keywords that indicate simple local tasks
+  // Simple/trivial keywords → always local regardless of length
   const simpleKeywords = ['fix typo', 'rename', 'format', 'indent', 'add comment', 'print', 'console.log', 'variable name'];
-  const mediumKeywords = ['explain', 'debug', 'refactor', 'optimize', 'why', 'what does', 'how does', 'error', 'bug'];
-  const heavyKeywords = ['architecture', 'design', 'implement', 'create', 'build', 'system', 'plan', 'multi', 'complex'];
+  // Medium complexity keywords → gemini (own keys, zero Antigravity tokens)
+  const mediumKeywords = ['explain', 'debug', 'refactor', 'optimize', 'why', 'what does', 'how does', 'error', 'bug', 'what is', 'difference'];
+  // Heavy complexity keywords → nemotron
+  const heavyKeywords = ['architecture', 'design', 'implement', 'create system', 'build', 'plan', 'multi', 'complex', 'full stack'];
 
-  if (len < 100 || simpleKeywords.some(k => lower.includes(k))) {
-    return 'local'; // Zero tokens - Ollama
-  }
-  if (len < 400 || mediumKeywords.some(k => lower.includes(k))) {
-    return 'gemini'; // Own keys - Zero Antigravity tokens
-  }
-  if (len < 1200 || heavyKeywords.some(k => lower.includes(k))) {
-    return 'nemotron'; // NIM cloud - Zero Antigravity tokens
-  }
-  return 'antigravity'; // Last resort - Antigravity tokens
+  // KEYWORDS FIRST — they always win over length
+  if (simpleKeywords.some(k => lower.includes(k))) return 'local';
+  if (mediumKeywords.some(k => lower.includes(k))) return 'gemini';
+  if (heavyKeywords.some(k => lower.includes(k))) return 'nemotron';
+
+  // Length as tiebreaker when no keyword matches
+  if (len < 80) return 'local';
+  if (len < 500) return 'gemini';
+  return 'nemotron';
 }
 
 async function queryModel(mode, prompt) {

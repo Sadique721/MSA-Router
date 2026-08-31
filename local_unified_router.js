@@ -642,26 +642,36 @@ if (isMainThread) {
 
           spans.T1_routed = Date.now() - startTime;
 
+          const ctx = activeRequests.get(reqId);
+
           // Circuit Breaker health check & early failover
           if (breakers[targetWorker] && !breakers[targetWorker].canRequest()) {
             if (targetWorker === 'online') {
-              console.log(`[Circuit Breaker] 🚨 Online Free circuit is OPEN. Performing early failover to Gemini key-rotation worker...`);
+              console.log(`[Circuit Breaker] 🚨 Online Free circuit is OPEN. Failing over to Gemini key-rotation worker...`);
               targetWorker = 'gemini';
+            } else if (targetWorker === 'gemini') {
+              // KEY FIX: Gemini keys exhausted (daily quota) -> fallback to local Ollama
+              console.log(`[Circuit Breaker] 🚨 Gemini circuit is OPEN (keys exhausted). Falling back to LOCAL Ollama (zero tokens)...`);
+              targetWorker = 'local';
+              payload.model = 'qwen2.5:7b-instruct'; // Best local model
+            } else if (targetWorker === 'nemotron') {
+              // Nemotron unavailable -> try Gemini, then local
+              if (breakers['gemini'] && !breakers['gemini'].canRequest()) {
+                console.log(`[Circuit Breaker] 🚨 Both Nemotron + Gemini OPEN. Falling back to LOCAL Ollama...`);
+                targetWorker = 'local';
+                payload.model = 'qwen2.5:7b-instruct';
+              } else {
+                console.log(`[Circuit Breaker] 🚨 Nemotron circuit OPEN. Falling over to Gemini...`);
+                targetWorker = 'gemini';
+              }
             }
           }
 
-          const ctx = activeRequests.get(reqId);
-
-          // If the selected worker circuit is OPEN and no fallback is possible, reject request
+          // If STILL open after fallback (should not happen), reject gracefully
           if (breakers[targetWorker] && !breakers[targetWorker].canRequest()) {
-            console.warn(`[Circuit Breaker] 🚨 Denying request ${reqId} because target worker ${targetWorker} circuit is OPEN.`);
-            if (ctx) {
-              sendError(ctx, reqId, 503, `Service temporarily unavailable. Circuit breaker is OPEN for ${targetWorker} provider.`, targetWorker);
-            } else {
-              res.writeHead(503, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: { message: `Service temporarily unavailable. Circuit breaker is OPEN for ${targetWorker} provider.`, type: 'circuit_open_error' } }));
-            }
-            return;
+            console.warn(`[Circuit Breaker] 🚨 All workers OPEN. Forcing local Ollama as last resort.`);
+            targetWorker = 'local';
+            payload.model = 'qwen2.5:7b-instruct';
           }
 
           // Store targetWorker in activeRequests context
@@ -728,14 +738,14 @@ else {
 
       try {
         if (workerData.type === 'local') {
-          // 5-second timeout for local Ollama to ensure fallback is fast (Fix 6)
-          const localTimeoutSignal = AbortSignal.timeout(5000);
+          // 30-second timeout for local Ollama to ensure cold-starts are supported
+          const localTimeoutSignal = AbortSignal.timeout(30000);
           const combinedSignal = AbortSignal.any([abortCtrl.signal, localTimeoutSignal]);
           try {
             await handleLocalRequest(reqId, payload, combinedSignal);
           } catch (err) {
             if (localTimeoutSignal.aborted) {
-              throw new Error('Local Ollama request timed out after 5s');
+              throw new Error('Local Ollama request timed out after 30s');
             }
             throw err;
           }
