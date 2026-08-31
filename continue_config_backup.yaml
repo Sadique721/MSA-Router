@@ -1,0 +1,83 @@
+﻿name: MSA AI
+version: 1.0.0
+schema: v1
+
+models:
+  # â”€â”€ PRIMARY: Docker MSA AI Router â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  - name: "MSA AI Router (Local — Auto)"
+    provider: openai
+    model: msa-ai
+    apiBase: http://127.0.0.1:20130/v1
+    apiKey: sk-msa-local
+    icon: msa-ai.png
+    roles: [chat, edit, apply]
+
+  # â”€â”€ FALLBACK: Host MSA AI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  - name: "MSA AI (Host Fallback)"
+    provider: openai
+    model: msa-ai
+    apiBase: http://127.0.0.1:20130/v1
+    apiKey: sk-msa-local
+    icon: msa-ai.png
+    roles: [chat, edit, apply]
+
+  # â”€â”€ OMNI-ROUTE GATEWAY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  - name: "OmniRoute Gateway"
+    provider: openai
+    model: msa-ai
+    apiBase: http://127.0.0.1:20128/v1
+    apiKey: sk-omniroute-local
+    icon: msa-ai.png
+    roles: [chat]
+
+  # â”€â”€ DIRECT OLLAMA MODELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  - name: "Qwen 2.5 Coder 7B (Direct)"
+    provider: ollama
+    model: qwen2.5:7b-instruct
+    apiBase: http://127.0.0.1:11435
+    icon: qwen.png
+
+  - name: "DeepSeek R1 7B (Reasoning)"
+    provider: ollama
+    model: deepseek-r1:7b
+    apiBase: http://127.0.0.1:11435
+    icon: deepseek.png
+
+  # â”€â”€ CLOUD MODELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  - name: "Google Gemini 2.5 Flash"
+    provider: gemini
+    model: gemini-2.5-flash
+    apiKey: YOUR_GEMINI_API_KEY
+    icon: gemini.png
+    roles: [chat, edit, apply]
+    defaultCompletionOptions:
+      contextLength: 1048576
+      maxTokens: 65536
+    capabilities: [tool_use, image_input]
+
+  - name: "Google Gemini 2.5 Pro"
+    provider: gemini
+    model: gemini-2.5-pro
+    apiKey: YOUR_GEMINI_API_KEY
+    icon: gemini.png
+    roles: [chat, edit, apply]
+
+  - name: "DeepSeek V4 Pro (Cloud)"
+    provider: openai
+    model: deepseek-v4-pro
+    apiBase: http://127.0.0.1:20130/v1
+    apiKey: sk-msa-local
+    icon: deepseek.png
+    roles: [chat, edit, apply]
+    defaultCompletionOptions:
+      contextLength: 1048576
+      maxTokens: 65536
+    capabilities: [tool_use, image_input]
+
+# â”€â”€ AUTOCOMPLETE: Fast inline completions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+tabAutocompleteModel:
+  name: "MSA Autocomplete (Qwen 0.5B)"
+  provider: ollama
+  model: qwen2.5:0.5b
+  apiBase: http://127.0.0.1:11435
+  icon: qwen.png
